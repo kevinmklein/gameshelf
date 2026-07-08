@@ -6,6 +6,12 @@
   command = "npm run build"
   publish = "dist"
 
+# The Firebase web config is public by design and Vite inlines it into the JS
+# bundle. Tell Netlify's secret scanner to ignore these keys so it doesn't flag
+# them and fail the build.
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "VITE_FIREBASE_API_KEY,VITE_FIREBASE_AUTH_DOMAIN,VITE_FIREBASE_PROJECT_ID,VITE_FIREBASE_STORAGE_BUCKET,VITE_FIREBASE_MESSAGING_SENDER_ID,VITE_FIREBASE_APP_ID"
+
 # SPA fallback: let React handle client routes, but keep real files (like
 # /prototype/index.html and built assets) served directly.
 [[redirects]]
