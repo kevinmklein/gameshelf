@@ -1,0 +1,8 @@
+# Netlify config for Game Shelf
+# Phase 1: the site is the static prototype in ./prototype (index.html served at /).
+# When we scaffold the Vite app in Phase 2, this becomes:
+#   [build]
+#     command = "npm run build"
+#     publish = "dist"
+[build]
+  publish = "prototype"
