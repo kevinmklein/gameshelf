@@ -46,8 +46,13 @@ export default function App() {
             <div className="sub">The Klein family collection · Thursday Game Night HQ</div>
           </div>
           <div className="hdr-right">
-            <span className={`badge ${hasFirebase ? 'cloud' : 'local'}`}>
-              {hasFirebase ? '☁ Cloud synced' : '⬤ Local (this device)'}
+            <span
+              className={`badge ${hasFirebase ? 'cloud' : 'local'}`}
+              title={hasFirebase
+                ? 'Saved to the cloud and shared across everyone’s devices.'
+                : 'Saved only in this browser (no cloud config found).'}
+            >
+              {hasFirebase ? '☁ Cloud synced' : '💾 On this device'}
             </span>
             <button className="theme-btn" onClick={() => setTheme(dark ? 'light' : 'dark')}>
               {dark ? '☀️ Daylight' : '🌙 Evening'}

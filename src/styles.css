@@ -89,7 +89,8 @@ h2.big{font-size:26px}
 .shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px;margin-top:18px}
 .board{position:relative}
 .board.rowend::after{content:"";display:block;height:16px;margin-top:2px;border-radius:0 0 6px 6px;background:linear-gradient(var(--walnut),var(--walnut-dk));box-shadow:0 8px 14px -6px var(--shadow)}
-.gbox{position:relative;border-radius:9px 9px 4px 4px;overflow:hidden;cursor:default;text-align:left;border:1px solid rgba(0,0,0,.18);padding:0;width:100%;box-shadow:0 6px 12px -6px var(--shadow);transition:transform .16s ease,box-shadow .16s ease;display:flex;flex-direction:column;aspect-ratio:3/3.6;color:#fff}
+.gbox{position:relative;border-radius:9px 9px 4px 4px;overflow:hidden;cursor:pointer;text-align:left;border:1px solid rgba(0,0,0,.18);padding:0;width:100%;box-shadow:0 6px 12px -6px var(--shadow);transition:transform .16s ease,box-shadow .16s ease;display:flex;flex-direction:column;aspect-ratio:3/3.6;color:#fff}
+.gbox:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
 .gbox:hover{transform:translateY(-6px);box-shadow:0 16px 24px -10px var(--shadow)}
 .gbox .art{flex:1;padding:12px;display:flex;flex-direction:column;justify-content:space-between;position:relative}
 .gbox .art::before{content:"";position:absolute;inset:0;opacity:.16;background:radial-gradient(circle at 30% 20%,#fff,transparent 45%)}
@@ -119,4 +120,33 @@ h2.big{font-size:26px}
 .soon{margin-top:22px;background:var(--paper);border:1px dashed var(--hair);border-radius:14px;padding:22px;color:var(--ink-2)}
 .soon a{color:var(--brass-lo)}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--felt);color:#f4ead2;padding:11px 18px;border-radius:11px;font-size:13.5px;font-weight:600;box-shadow:0 10px 24px -8px var(--shadow);z-index:60;animation:fade .2s}
+/* search box */
+.search-wrap{position:relative;display:inline-block}
+.search-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;opacity:.55;pointer-events:none}
+input.search{font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--hair);border-radius:11px;padding:9px 14px 9px 33px;width:220px;max-width:100%;box-shadow:inset 0 1px 2px var(--shadow)}
+input.search::placeholder{color:var(--ink-2)}
+input.search:hover{border-color:var(--brass-lo)}
+input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;border-color:var(--brass)}
+
+/* detail modal */
+.scrim{position:fixed;inset:0;background:rgba(20,15,5,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50;animation:fade .18s ease}
+.modal{background:var(--card);border-radius:16px;max-width:440px;width:100%;overflow:hidden;box-shadow:0 30px 60px -20px rgba(0,0,0,.5);border:1px solid var(--hair);animation:pop .22s cubic-bezier(.2,.8,.2,1)}
+@keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:scale(1);opacity:1}}
+.modal .hero{padding:22px;color:#fff;position:relative}
+.modal .hero .kind{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;opacity:.9}
+.modal .hero h3{font-size:28px;margin-top:4px;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+.modal .x{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.3);border:0;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;line-height:1}
+.modal .x:hover{background:rgba(0,0,0,.5)}
+.modal .body{padding:20px 22px 22px}
+.specs{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin:2px 0 16px}
+.spec .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2);font-weight:700}
+.spec .v{font-size:15px;font-weight:600;margin-top:1px}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:11.5px;background:var(--paper);border:1px solid var(--hair);border-radius:20px;padding:3px 10px;color:var(--ink-2);font-weight:600}
+.played{margin-top:16px;font-size:13px;color:var(--ink-2)}
+.played b{color:var(--ink)}
+.modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--hair)}
+.del-link{background:none;border:0;color:var(--crit);font-weight:600;cursor:pointer;font-size:13px;padding:6px 4px}
+.del-link:hover{text-decoration:underline}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
