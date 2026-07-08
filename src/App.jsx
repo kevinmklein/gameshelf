@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { subscribeGames, hasFirebase } from './lib/catalog.js'
+import { ensureAuth } from './lib/firebase.js'
 import Shelf from './components/Shelf.jsx'
 import AddGame from './components/AddGame.jsx'
 
@@ -14,7 +15,12 @@ export default function App() {
   const [games, setGames] = useState([])
   const [theme, setTheme] = useState(null) // null = follow OS
 
-  useEffect(() => subscribeGames(setGames), [])
+  useEffect(() => {
+    let unsub = () => {}
+    let cancelled = false
+    ensureAuth().then(() => { if (!cancelled) unsub = subscribeGames(setGames) })
+    return () => { cancelled = true; unsub() }
+  }, [])
 
   const dark =
     theme === 'dark' ||

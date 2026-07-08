@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Family app baseline: only signed-in visitors may read or write.
+    // Every browser gets a silent anonymous account (see src/lib/firebase.js),
+    // so the family sees no login — but the database is closed to the open web
+    // and to bots. Tighten later (per-collection rules, guest vs. family, etc.).
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

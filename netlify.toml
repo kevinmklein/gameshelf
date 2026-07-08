@@ -1,8 +1,14 @@
 # Netlify config for Game Shelf
-# Phase 1: the site is the static prototype in ./prototype (index.html served at /).
-# When we scaffold the Vite app in Phase 2, this becomes:
-#   [build]
-#     command = "npm run build"
-#     publish = "dist"
+# Builds the Vite + React app. The Phase 1 prototype is served from
+# public/prototype/ (Vite copies public/ to dist/), so it stays reachable
+# at /prototype/ for reference.
 [build]
-  publish = "prototype"
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback: let React handle client routes, but keep real files (like
+# /prototype/index.html and built assets) served directly.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
