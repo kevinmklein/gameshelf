@@ -13,17 +13,15 @@ recurring **Thursday Game Night** (or any night) easier and less rut-prone.
 - **Owner:** Kevin (Dad) — *novice web dev*: knows basic git/CLI/Netlify but needs explicit,
   step-by-step CLI + console instructions. Never assume tooling knowledge.
 
-## ⚠️ Current blocker (open as of 2026-07-08 — resume here)
-Adding games fails on the live site. Root cause: the **`VITE_FIREBASE_API_KEY` value in
-Netlify is truncated to `AIzaSyD4`** (first 8 chars). The full key is 39 chars:
-`AIzaSyD4z6SNgdD6kyzGaXFKo-t6aTMeaEulrTk` (ends in `EulrTk`).
-Because the key is invalid → anonymous sign-in fails (`auth/api-key-not-valid`) → and since
-the strict Firestore rules require auth, all reads/writes return `permission-denied`.
+## Current state (2026-07-08) — working end-to-end
+**The live app is fully operational.** Cloud-connected: silent anonymous sign-in succeeds,
+the strict Firestore rules are satisfied, and adding/browsing games works on desktop + mobile.
+(An earlier blocker — a truncated `VITE_FIREBASE_API_KEY` in Netlify (`AIzaSyD4…`) — is fixed;
+the full 39-char key is live and verified in the bundle.)
 
-**Fix (Kevin, in Netlify):** Environment variables → `VITE_FIREBASE_API_KEY` → set the full
-39-char value → **Deploys → Trigger deploy → Clear cache and deploy site** (env changes don't
-auto-redeploy). Then verify: extract the key from the live JS bundle and confirm it's the full
-value, and that adding a game works end-to-end. Everything else is confirmed working.
+Lessons kept for reference: Vite needs env names in exact UPPERCASE; Netlify env-var changes
+require a manual "Clear cache and deploy site"; copy API keys with the copy icon, not
+double-click (which truncates at the first `-`).
 
 ## The Family (default profiles)
 | Profile | Who | Notes |
@@ -122,9 +120,7 @@ Work on `main`. `git add … && git commit && git push` → Netlify auto-builds 
 Verify deploys via the live JS bundle (curl the `/assets/index-*.js` and grep) or the
 Netlify MCP reader.
 
-## Resume checklist (next session)
-1. Confirm the API-key fix + redeploy; verify full key in live bundle and that adding a game
-   works end-to-end on the live site (badge Cloud synced + no permission-denied).
-2. Wire **Game Night** + **Stats** to the real Firestore catalog.
-3. Add **BGG auto-fill** once the token lands.
-4. Optional: draft a "add ~100 games fast" workflow for bulk intake.
+## Next up
+1. Wire **Game Night** + **Stats** to the real Firestore catalog.
+2. Add **BGG auto-fill** once the token lands.
+3. Optional: draft a "add ~100 games fast" workflow for bulk intake.
