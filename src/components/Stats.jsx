@@ -143,15 +143,23 @@ function Dashboard({ games, plays }) {
     plays.forEach((p) => { const k = p.gameName; if (k) counts[k] = (counts[k] || 0) + 1 })
     const mostPlayed = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]
 
+    const kindCounts = {}
+    plays.forEach((p) => {
+      const g = games.find((x) => x.id === p.gameId) || games.find((x) => x.name === p.gameName)
+      if (g?.kind) kindCounts[g.kind] = (kindCounts[g.kind] || 0) + 1
+    })
+    const kindRows = Object.entries(kindCounts).sort((a, b) => b[1] - a[1])
+
     const dusty = [...games]
       .map((g) => ({ g, d: playedDaysAgo(g) }))
       .sort((a, b) => (b.d == null ? 1e9 : b.d) - (a.d == null ? 1e9 : a.d))
       .slice(0, 3)
 
-    return { nights, totalMin, winRows, mostPlayed, dusty }
+    return { nights, totalMin, winRows, mostPlayed, kindRows, dusty }
   }, [games, plays])
 
   const maxWins = s.winRows[0]?.[1] || 1
+  const maxKind = s.kindRows[0]?.[1] || 1
 
   return (
     <>
@@ -169,6 +177,24 @@ function Dashboard({ games, plays }) {
           <div className="lbl">Most played{s.mostPlayed ? ` · ${s.mostPlayed[1]}×` : ''}</div>
         </div>
       </div>
+
+      {s.kindRows.length > 0 && (
+        <div className="panel">
+          <div className="eyebrow">By category</div>
+          <h3 className="stat-h">🎲 Game Types Played</h3>
+          <div className="lb">
+            {s.kindRows.map(([kind, n]) => (
+              <div className="lbrow" key={kind}>
+                <div className="lbname">{kind}</div>
+                <div className="lbbar-wrap">
+                  <div className="lbbar" style={{ width: `${Math.round((n / maxKind) * 100)}%` }} />
+                </div>
+                <div className="lbval tnum">{n}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid2" style={{ marginTop: 18 }}>
         <div className="panel" style={{ marginTop: 0 }}>

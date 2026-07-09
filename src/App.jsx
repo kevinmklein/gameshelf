@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { subscribeGames, subscribePlays, getUid, hasFirebase } from './lib/catalog.js'
+import { subscribeGames, subscribePlays, getUid } from './lib/catalog.js'
 import { ensureAuth } from './lib/firebase.js'
 import Shelf from './components/Shelf.jsx'
 import AddGame from './components/AddGame.jsx'
@@ -25,7 +25,6 @@ export default function App() {
   const [games, setGames] = useState([])
   const [plays, setPlays] = useState([])
   const [uid, setUid] = useState(null)
-  const [theme, setTheme] = useState(null) // null = follow OS
   const route = useRoute()
 
   useEffect(() => {
@@ -41,14 +40,6 @@ export default function App() {
     return () => { cancelled = true; unsubGames(); unsubPlays() }
   }, [])
 
-  const dark =
-    theme === 'dark' ||
-    (theme === null && window.matchMedia('(prefers-color-scheme: dark)').matches)
-  useEffect(() => {
-    if (theme) document.documentElement.dataset.theme = theme
-    else delete document.documentElement.dataset.theme
-  }, [theme])
-
   const tabs = [
     ['shelf', 'The Shelf'],
     ['night', 'Game Time'],
@@ -62,23 +53,8 @@ export default function App() {
     <>
       <header className="top">
         <div className="brand">
-          <div>
-            <img className="brand-logo" src="/brand/logo.png" alt="Game Shelf" />
-            <div className="sub">The Klein family collection · Thursday Game Night HQ</div>
-          </div>
-          <div className="hdr-right">
-            <span
-              className={`badge ${hasFirebase ? 'cloud' : 'local'}`}
-              title={hasFirebase
-                ? 'Saved to the cloud and shared across everyone’s devices.'
-                : 'Saved only in this browser (no cloud config found).'}
-            >
-              {hasFirebase ? '☁ Cloud synced' : '💾 On this device'}
-            </span>
-            <button className="theme-btn" onClick={() => setTheme(dark ? 'light' : 'dark')}>
-              {dark ? '☀️ Daylight' : '🌙 Evening'}
-            </button>
-          </div>
+          <img className="brand-logo" src="/brand/logo.png" alt="Game Shelf" />
+          <div className="sub">The Klein family collection · Thursday Game Night HQ</div>
         </div>
         {!joining && (
           <nav className="tabs" role="tablist">

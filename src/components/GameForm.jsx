@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { coverFor } from '../lib/catalog.js'
 import { Seg } from './gameNightBits.jsx'
 
-const KINDS = ['Card', 'Strategy', 'Party', 'Dice', 'Dominoes', 'Abstract', 'Family']
+const KINDS = ['Card', 'Strategy', 'Party', 'Dice', 'Dominoes', 'Abstract', 'Family', 'Word Game']
 const BLANK = {
   name: '', kind: 'Card', time: 20, minP: 2, maxP: 4,
   loc: 'either', att: 'semi', setup: 'quick', image: '',
@@ -66,7 +66,7 @@ export default function GameForm({ mode = 'add', initial, onSubmitCore, onDone, 
       <div className="field">
         <label htmlFor="gf-name">Game name</label>
         <input
-          id="gf-name" type="text" autoFocus placeholder="e.g. Carcassonne"
+          id="gf-name" type="text" placeholder="e.g. Carcassonne"
           value={f.name}
           onChange={(e) => set('name')(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') submit(false) }}

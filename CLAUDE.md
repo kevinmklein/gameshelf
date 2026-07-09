@@ -30,6 +30,15 @@ code (`FAMILY`/`colorFor` → `src/lib/family.js`; `Seg`/`Meeple` → `gameNight
 both themes — see Branding below); generated favicon/apple-touch-icon/manifest icons from the
 logo's book-shelf mark, retiring the placeholder `icon.svg`.
 
+2026-07-09 QA pass: dropped the Evening/dark theme entirely (see Locked Decisions) and the
+header's cloud-synced badge, freeing up header space for the tagline. Fixed the iOS PWA status
+bar overlapping header content (`apple-mobile-web-app-status-bar-style` → `default` +
+`safe-area-inset-top` padding), the edit-game modal not scrolling on mobile (`.modal` now has
+`max-height` + `overflow-y:auto`), a `.grid2`/`.field` CSS bug that misaligned the Type field
+against Typical Play Time, and removed the Add-a-Game name field's `autoFocus` (was popping the
+iOS keyboard on tab switch). Added a **Word Game** kind (Scrabble + Boggle reclassified in
+Firestore) and a "Game Types Played" bar chart on Stats, grouped by kind from the play log.
+
 Security note: the Firebase web API key is public by design (it ships in the client bundle);
 it was once committed in git history and flagged by GitHub. It's now **restricted in Google
 Cloud** to the site's referrers, so the alert is dismissible. Never paste the key value into
@@ -86,18 +95,21 @@ launches standalone. A scanned QR always opens the browser first; that's inheren
 ## Branding
 Real logo lives at `public/brand/logo.png` (947×363, transparent bg, wordmark + a book-shelf
 icon mark). The header (`App.jsx`) shows it directly via `<img class="brand-logo">` — no more
-meeple placeholder. Header is a **fixed off-white plate** (`--header-bg` etc. in `styles.css`,
-defined once outside the theme blocks) so it looks the same in Daylight and Evening; only the
-page below switches. Favicon/apple-touch-icon/manifest icons are cropped from the same file's
-icon mark (left ~427px) — see PWA / install above. If the logo changes, regenerate those with
-the same crop-and-pad approach (icon mark trimmed to its bbox, centered on a square canvas;
-opaque felt-green `#2f4a3a` background for apple-touch-icon + manifest icons, transparent for
-favicons).
+meeple placeholder, and the "Klein family collection" tagline sits to its right (where the
+old cloud-synced badge / theme toggle used to be — see Locked Decisions). Header is a **fixed
+off-white plate** (`--header-bg` etc. in `styles.css`) with `padding-top:env(safe-area-inset-top)`
+so it doesn't collide with the iPhone status bar in standalone/PWA mode. Favicon/apple-touch-icon/
+manifest icons are cropped from the logo's icon mark (left ~427px) — see PWA / install above. If
+the logo changes, regenerate those with the same crop-and-pad approach (icon mark trimmed to its
+bbox, centered on a square canvas; opaque felt-green `#2f4a3a` background for apple-touch-icon +
+manifest icons, transparent for favicons).
 
 ## Locked Decisions
 - **Aesthetic: Cozy tabletop** — felt green (`--felt #2f4a3a`), walnut, brass (`--brass #c6902f`),
-  warm parchment. Display = Iowan/Georgia serif; body = system-ui; tabular-nums. Light + dark
-  ("Daylight"/"Evening"). Design system lives in `src/styles.css`.
+  warm parchment. Display = Iowan/Georgia serif; body = system-ui; tabular-nums. **Daylight only**
+  — the Evening/dark toggle and the `prefers-color-scheme` auto-switch were removed (low value,
+  ate header space); `:root` in `styles.css` is now the single source of truth for all colors.
+  Design system lives in `src/styles.css`.
 - **Voting model: everyone on their own phone, async.** Host sets the table (constraints) →
   gets a QR + shareable link → others open it, pick who they are (or add a player) → submit
   top-3 whenever → reveal. No device-passing. (Demonstrated in the prototype.)
@@ -126,7 +138,7 @@ favicons).
 | Attention | background (half-watch) / semi / focus | family tag |
 | Players | min–max | BGG (auto) / manual |
 | Complexity | 1–5 weight | BGG (auto) |
-| Type (kind) | Card / Strategy / Party / Dice / Dominoes / Abstract / Family | BGG + tag |
+| Type (kind) | Card / Strategy / Party / Dice / Dominoes / Abstract / Family / Word Game | BGG + tag |
 First four are the hard "rule things out" constraints; the rest are soft preferences.
 
 ## Architecture (implemented)
@@ -138,7 +150,8 @@ First four are the hard "rule things out" constraints; the rest are soft prefere
   - `src/lib/catalog.js` — the data layer. ONE interface, TWO backends: **Firestore when
     configured, localStorage fallback otherwise** (auto-switch). `subscribeGames`, `addGame`,
     `deleteGame`, `coverFor(name)` (gradient cover from name hash).
-  - `src/App.jsx` — header (storage badge, theme toggle), tabs, auth-then-subscribe.
+  - `src/App.jsx` — header (logo + tagline, no theme toggle or connectivity badge — see
+    Locked Decisions), tabs, auth-then-subscribe.
   - `src/components/Shelf.jsx` — browse/search/detail-modal.
   - `src/components/AddGame.jsx` — manual intake form.
   - `src/components/Stats.jsx` — log-a-night form + core-stats dashboard.
