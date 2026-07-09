@@ -260,7 +260,7 @@ export default function Stats({ games, plays }) {
   return (
     <section className="tab">
       <div className="eyebrow">Since we started tracking</div>
-      <h2 className="big">Stats</h2>
+      <h2 className="big">Play Stats</h2>
       <p className="lead">
         Who’s on a heater, what’s been loved to death, and which boxes are gathering dust.
         Scroll down to log a Game Time — it feeds the leaderboard and powers Game Time’s

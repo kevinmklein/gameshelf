@@ -94,7 +94,7 @@ export default function GameNight({ games, uid }) {
           <RevealResults results={tally(session.ballot, votes)} voterNames={votes.map((v) => v.name)} />
           <div className="actions">
             {logged ? (
-              <span className="badge cloud">✓ Logged to Stats — add who won on the Stats tab</span>
+              <span className="badge cloud">✓ Logged to Play Stats — add who won on the Play Stats tab</span>
             ) : (
               <button className="btn brass" onClick={logNight}>✓ We’re playing this — log this Game Time</button>
             )}

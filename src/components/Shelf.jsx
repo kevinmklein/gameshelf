@@ -208,7 +208,7 @@ export default function Shelf({ games, onAdd }) {
         <div>
           <div className="eyebrow">Browse the collection</div>
           <h2 className="big">
-            The Shelf <span className="count tnum">· {filtered.length} game{filtered.length === 1 ? '' : 's'}</span>
+            Our Shelf <span className="count tnum">· {filtered.length} game{filtered.length === 1 ? '' : 's'}</span>
           </h2>
         </div>
         {games.length > 0 && (

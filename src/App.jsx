@@ -41,9 +41,9 @@ export default function App() {
   }, [])
 
   const tabs = [
-    ['shelf', 'The Shelf'],
+    ['shelf', 'Our Shelf'],
     ['night', 'Game Time'],
-    ['stats', 'Stats'],
+    ['stats', 'Play Stats'],
     ['add', 'Add a Game'],
   ]
 
