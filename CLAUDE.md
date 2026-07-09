@@ -16,8 +16,9 @@ recurring **Thursday Game Night** (or any night) easier and less rut-prone.
 ## Current state (2026-07-08) — working end-to-end
 **The live app is fully operational.** Cloud-connected: silent anonymous sign-in succeeds,
 the strict Firestore rules are satisfied, and adding/browsing games works on desktop + mobile.
-(An earlier blocker — a truncated `VITE_FIREBASE_API_KEY` in Netlify (`AIzaSyD4…`) — is fixed;
-the full 39-char key is live and verified in the bundle.)
+(An earlier blocker — a truncated `VITE_FIREBASE_API_KEY` in Netlify — is fixed; the full
+39-char key is live and verified in the bundle. Never paste the key value into tracked files;
+it belongs only in `.env.local` and Netlify env vars.)
 
 Lessons kept for reference: Vite needs env names in exact UPPERCASE; Netlify env-var changes
 require a manual "Clear cache and deploy site"; copy API keys with the copy icon, not
@@ -35,7 +36,8 @@ Guests/extended family add a lightweight profile on the fly (planned: on the Gam
 ## The Three Features
 1. **The Shelf** — visual library. Games shown as boxes on wooden shelves. ✅ Built: browse,
    **search + filter bar** (players / where / length / type), click a box → **detail modal**
-   (specs, tags, play history), remove-from-shelf inside it.
+   (specs, tags, play history) with **Edit** + remove-from-shelf inside it. Add and Edit share
+   `GameForm.jsx`; edit calls `updateGame(id, patch)`.
 2. **Game Night** — the voting engine (see rules below). ✅ Built & wired to the real catalog
    with **real-time Firestore rooms**. Host: Set the Table (constraints) → session created +
    ballot built from the live shelf → Share (real scannable QR + `#/join/CODE` link) → live

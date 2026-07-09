@@ -151,6 +151,7 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 .played{margin-top:16px;font-size:13px;color:var(--ink-2)}
 .played b{color:var(--ink)}
 .modal-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--hair)}
+.foot-right{display:flex;gap:10px}
 .del-link{background:none;border:0;color:var(--crit);font-weight:600;cursor:pointer;font-size:13px;padding:6px 4px}
 .del-link:hover{text-decoration:underline}
 
@@ -164,7 +165,7 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 
 .statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
 @media(max-width:560px){.statgrid{grid-template-columns:1fr}}
-.statcard{background:var(--paper);border:1px solid var(--hair);border-radius:16px;padding:18px 20px}
+.statcard{background:var(--paper);border:1px solid var(--hair);border-radius:16px;padding:18px 20px;text-align:center}
 .statcard .num{font-family:var(--disp);font-size:30px;font-weight:700;color:var(--ink);line-height:1.05}
 .statcard .lbl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2);font-weight:700;margin-top:8px}
 .stat-h{font-family:var(--disp);font-size:19px;margin:2px 0 12px}

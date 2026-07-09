@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { deleteGame, playedDaysAgo } from '../lib/catalog.js'
+import { deleteGame, updateGame, playedDaysAgo } from '../lib/catalog.js'
+import GameForm from './GameForm.jsx'
 
 const agoLabel = (d) =>
   d === 0 ? 'today' : d === 1 ? 'yesterday' : d < 30 ? `${d} days ago`
@@ -37,14 +38,37 @@ function GameBox({ g, onOpen }) {
 }
 
 function GameDetail({ g, onClose }) {
+  const [editing, setEditing] = useState(false)
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    const onKey = (e) => { if (e.key === 'Escape') { editing ? setEditing(false) : onClose() } }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
+  }, [onClose, editing])
 
   const cover = g.cover || { c1: '#3a3a3a', c2: '#222' }
   const spec = (k, v) => (v ? <div className="spec"><div className="k">{k}</div><div className="v">{v}</div></div> : null)
+
+  if (editing) {
+    return (
+      <div className="scrim" onClick={(e) => { if (e.target === e.currentTarget) setEditing(false) }}>
+        <div className="modal" role="dialog" aria-modal="true" aria-label={`Edit ${g.name}`}>
+          <div className="hero" style={{ background: `linear-gradient(150deg, ${cover.c1}, ${cover.c2})` }}>
+            <button className="x" onClick={() => setEditing(false)} aria-label="Cancel">✕</button>
+            <div className="kind">Editing</div>
+            <h3>{g.name}</h3>
+          </div>
+          <div className="body">
+            <GameForm
+              mode="edit" initial={g}
+              onSubmitCore={(core) => updateGame(g.id, core)}
+              onDone={onClose}
+              onCancel={() => setEditing(false)}
+            />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="scrim" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
@@ -82,7 +106,10 @@ function GameDetail({ g, onClose }) {
             <button className="del-link" onClick={() => {
               if (confirm(`Remove "${g.name}" from the shelf?`)) { deleteGame(g.id); onClose() }
             }}>Remove from shelf</button>
-            <button className="btn ghost" onClick={onClose}>Close</button>
+            <div className="foot-right">
+              <button className="btn ghost" onClick={() => setEditing(true)}>Edit</button>
+              <button className="btn ghost" onClick={onClose}>Close</button>
+            </div>
           </div>
         </div>
       </div>

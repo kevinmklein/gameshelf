@@ -66,6 +66,13 @@ export async function addGame(game) {
   lsWrite(list)
 }
 
+export async function updateGame(id, patch) {
+  if (hasFirebase) { await updateDoc(doc(db, 'games', id), patch); return }
+  const list = lsRead()
+  const i = list.findIndex((g) => g.id === id)
+  if (i >= 0) { list[i] = { ...list[i], ...patch }; lsWrite(list) }
+}
+
 export async function deleteGame(id) {
   if (hasFirebase) { await deleteDoc(doc(db, 'games', id)); return }
   lsWrite(lsRead().filter((g) => g.id !== id))
