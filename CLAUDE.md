@@ -35,10 +35,18 @@ Guests/extended family add a lightweight profile on the fly (planned: on the Gam
 ## The Three Features
 1. **The Shelf** — visual library. Games shown as boxes on wooden shelves. ✅ Built: browse,
    search, click a box → **detail modal** (specs, tags, play history), remove-from-shelf inside it.
-2. **Game Night** — the voting engine (see rules below). ⏳ Stubbed in the live app; fully
-   playable in the /prototype/. Needs wiring to the real catalog + real-time rooms.
-3. **Stats** — log nights, show aggregate + per-person stats. ⏳ Stubbed. Scope for v0.1 =
-   **log + core stats** (games played, total time, wins per person, most-played, Dusty Shelf).
+2. **Game Night** — the voting engine (see rules below). ✅ Built & wired to the real catalog
+   with **real-time Firestore rooms**. Host: Set the Table (constraints) → session created +
+   ballot built from the live shelf → Share (real scannable QR + `#/join/CODE` link) → live
+   Lobby (votes stream in) → Reveal (Borda 3/2/1 + freshness nudge + Captain tiebreak). Voters
+   open the link on their own phones, pick who they are (or add a guest), rank top-3, submit —
+   fully async, no device-passing. Reveal's "log the night" writes a play → feeds Stats.
+3. **Stats** — log nights, show aggregate + per-person stats. ✅ Built (v0.1 = **log + core
+   stats**): a "Log a game night" form (game, date, who-played chips + on-the-fly guests,
+   winner, minutes) and a dashboard — nights logged, time at the table, most-played, a
+   wins-per-person leaderboard, the Dusty Shelf, and a recent-nights log. Logging a play
+   also freshens the game's `lastPlayed`/`plays`, seeding Game Night's future freshness math.
+   Not yet built: editing/removing a logged play (removal needs a `lastPlayed` recompute).
 
 ## Locked Decisions
 - **Aesthetic: Cozy tabletop** — felt green (`--felt #2f4a3a`), walnut, brass (`--brass #c6902f`),
@@ -86,9 +94,31 @@ First four are the hard "rule things out" constraints; the rest are soft prefere
   - `src/App.jsx` — header (storage badge, theme toggle), tabs, auth-then-subscribe.
   - `src/components/Shelf.jsx` — browse/search/detail-modal.
   - `src/components/AddGame.jsx` — manual intake form.
+  - `src/components/Stats.jsx` — log-a-night form + core-stats dashboard.
+  - `src/lib/night.js` — pure voting-engine logic (`eligible`, `buildBallot`, `tally`,
+    `captainFor`, `makeRoomCode`, `joinUrl`, `colorFor`, `FAMILY`). No Firestore/React.
+  - `src/components/GameNight.jsx` — host flow (Set the Table → Share → Lobby → Reveal).
+  - `src/components/Join.jsx` — the `#/join/CODE` voter view.
+  - `src/components/gameNightBits.jsx` — shared UI (`BallotPicker`, `VoteFlow`,
+    `IdentityPicker`, `RevealResults`, `Avatar`, `Meeple`).
+  - `catalog.js` also exports: `subscribePlays`, `logPlay(play)`, `playedDaysAgo(game)`
+    (live days-since; falls back to legacy static `last`); `getUid(user)` (stable per-device
+    id); and the session API `createSession`, `subscribeSession`, `subscribeVotes`,
+    `submitVote`, `revealSession`.
+- **Routing:** tiny hash router in `App.jsx`. `#/join/CODE` → voter view (tabs hidden);
+  everything else → the normal tabbed app. Hash routing needs no Netlify redirect config.
+- **Dependency added:** `qrcode.react` (real scannable QR for the join link).
 - **Game doc shape** (`games` collection): `name, kind, time, minPlayers, maxPlayers, players,
-  loc, att, setup, cover{c1,c2}, last, plays, source, createdAt`.
-- Planned collections: `players`, `sessions` (per game night), `plays` (stats feed).
+  loc, att, setup, cover{c1,c2}, last, lastPlayed, plays, source, createdAt`. `lastPlayed` is a
+  real millis timestamp set by `logPlay`; the older `last` (static "days ago") is legacy —
+  prefer `playedDaysAgo()`.
+- **Play doc shape** (`plays` collection, implemented): `gameId, gameName, players[], winner,
+  minutes, playedAt (millis), createdAt`. `winner` is null for co-op / no-winner nights.
+- **Session doc shape** (`sessions/{code}`, implemented): `phase ('voting'|'revealed'),
+  constraints{maxTime,loc,att}, ballot[frozen game snapshots], host (uid), createdAt`, with a
+  `votes/{voterId}` subcollection: `{name, color, ranking:[gameId×3], updatedAt}`. voterId =
+  `getUid()`. The `/{document=**}` rule already covers sessions + the votes subcollection.
+- Planned collections: `players` (persistent profiles).
 
 ## Firebase project
 - Project id: **game-shelf-81548**. Anonymous sign-in **enabled**. Firestore in **nam5**.
@@ -120,7 +150,17 @@ Work on `main`. `git add … && git commit && git push` → Netlify auto-builds 
 Verify deploys via the live JS bundle (curl the `/assets/index-*.js` and grep) or the
 Netlify MCP reader.
 
-## Next up
-1. Wire **Game Night** + **Stats** to the real Firestore catalog.
-2. Add **BGG auto-fill** once the token lands.
-3. Optional: draft a "add ~100 games fast" workflow for bulk intake.
+## Next up — full prototype is built (Shelf + Add + Game Night + Stats). Now: polish & bugs.
+Known gaps / follow-ups surfaced while building Game Night:
+1. **Host session isn't resumable.** The active room code lives in `GameNight.jsx` component
+   state — if the host refreshes or leaves the tab mid-night, the lobby is lost (the Firestore
+   session still exists). Persist the code to localStorage + offer "resume or start new."
+2. **Reveal logs `winner: null`** — it records that the winning game was played, but who won is
+   set later on the Stats tab. Consider a quick winner-picker on the reveal screen.
+3. **Stats:** edit/remove a logged play (needs `lastPlayed` recompute); per-game "log a play"
+   shortcut from the Shelf detail modal.
+4. **BGG auto-fill** once the token lands.
+5. Verified in cloud mode — left a couple of throwaway test sessions (`CROW-*`, `LYNX-*`) in the
+   `sessions` collection; harmless (random codes, not shown anywhere), clear anytime.
+6. Optional: draft a "add ~100 games fast" bulk-intake workflow.
+7. Bundle is ~665 kB (Firebase + qrcode). Fine for now; code-split later if load feels slow.

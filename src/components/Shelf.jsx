@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { deleteGame } from '../lib/catalog.js'
+import { deleteGame, playedDaysAgo } from '../lib/catalog.js'
+
+const agoLabel = (d) =>
+  d === 0 ? 'today' : d === 1 ? 'yesterday' : d < 30 ? `${d} days ago`
+    : d < 60 ? 'about a month ago' : `${Math.round(d / 30)} months ago`
 
 const locGlyph = (l) => (l === 'couch' ? '🛋' : l === 'table' ? '🪑' : '🛋🪑')
 const locLabel = (l) => (l === 'couch' ? 'Couch-friendly' : l === 'table' ? 'Needs a table' : 'Table or couch')
@@ -66,10 +70,13 @@ function GameDetail({ g, onClose }) {
             {g.source === 'manual' && <span className="tag">Hand-entered</span>}
           </div>
           <div className="played">
-            {g.last === 999 || g.last == null
-              ? 'Never played yet — a fresh face on the shelf.'
-              : <>Last played <b className="tnum">{g.last} days</b> ago</>}
-            {g.plays ? <> · played <b className="tnum">{g.plays}×</b></> : null}
+            {(() => {
+              const d = playedDaysAgo(g)
+              return d == null
+                ? 'Never played yet — a fresh face on the shelf.'
+                : <>Last played <b>{agoLabel(d)}</b></>
+            })()}
+            {g.plays ? <> · played <b className="tnum">{g.plays}×</b> all-time</> : null}
           </div>
           <div className="modal-foot">
             <button className="del-link" onClick={() => {

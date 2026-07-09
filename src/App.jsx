@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
-import { subscribeGames, hasFirebase } from './lib/catalog.js'
+import { subscribeGames, subscribePlays, getUid, hasFirebase } from './lib/catalog.js'
 import { ensureAuth } from './lib/firebase.js'
 import Shelf from './components/Shelf.jsx'
 import AddGame from './components/AddGame.jsx'
+import Stats from './components/Stats.jsx'
+import GameNight from './components/GameNight.jsx'
+import Join from './components/Join.jsx'
 
 const Meeple = ({ size = 26, fill = '#e0aa4c' }) => (
   <svg className="meeple" width={size} height={size} viewBox="0 0 24 24" fill={fill} aria-hidden="true">
@@ -10,16 +13,38 @@ const Meeple = ({ size = 26, fill = '#e0aa4c' }) => (
   </svg>
 )
 
+// Tiny hash router. `#/join/CODE` opens the voter view (shared link/QR target);
+// everything else is the normal tabbed app.
+function useRoute() {
+  const [hash, setHash] = useState(() => window.location.hash)
+  useEffect(() => {
+    const on = () => setHash(window.location.hash)
+    window.addEventListener('hashchange', on)
+    return () => window.removeEventListener('hashchange', on)
+  }, [])
+  const m = hash.match(/^#\/join\/([A-Za-z0-9-]+)/)
+  return m ? { name: 'join', code: m[1].toUpperCase() } : { name: 'home' }
+}
+
 export default function App() {
   const [tab, setTab] = useState('shelf')
   const [games, setGames] = useState([])
+  const [plays, setPlays] = useState([])
+  const [uid, setUid] = useState(null)
   const [theme, setTheme] = useState(null) // null = follow OS
+  const route = useRoute()
 
   useEffect(() => {
-    let unsub = () => {}
+    let unsubGames = () => {}
+    let unsubPlays = () => {}
     let cancelled = false
-    ensureAuth().then(() => { if (!cancelled) unsub = subscribeGames(setGames) })
-    return () => { cancelled = true; unsub() }
+    ensureAuth().then((user) => {
+      if (cancelled) return
+      setUid(getUid(user))
+      unsubGames = subscribeGames(setGames)
+      unsubPlays = subscribePlays(setPlays)
+    })
+    return () => { cancelled = true; unsubGames(); unsubPlays() }
   }, [])
 
   const dark =
@@ -36,6 +61,8 @@ export default function App() {
     ['night', 'Game Night'],
     ['stats', 'Stats'],
   ]
+
+  const joining = route.name === 'join'
 
   return (
     <>
@@ -59,35 +86,28 @@ export default function App() {
             </button>
           </div>
         </div>
-        <nav className="tabs" role="tablist">
-          {tabs.map(([id, label]) => (
-            <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>
-              {label}
-            </button>
-          ))}
-        </nav>
+        {!joining && (
+          <nav className="tabs" role="tablist">
+            {tabs.map(([id, label]) => (
+              <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>
+                {label}
+              </button>
+            ))}
+          </nav>
+        )}
       </header>
 
       <div className="wrap">
-        {tab === 'shelf' && <Shelf games={games} onAdd={() => setTab('add')} />}
-        {tab === 'add' && <AddGame onDone={() => setTab('shelf')} />}
-        {tab === 'night' && (
-          <section className="tab">
-            <div className="eyebrow">The main event</div>
-            <h2 className="big">Game Night</h2>
-            <div className="soon">
-              The voting engine lives in the <a href="/prototype/index.html">Phase 1 prototype</a> and
-              gets wired to your real catalog once a few games are in. For now, add your collection on
-              the <b>Add a Game</b> tab.
-            </div>
-          </section>
-        )}
-        {tab === 'stats' && (
-          <section className="tab">
-            <div className="eyebrow">Since we started tracking</div>
-            <h2 className="big">Stats</h2>
-            <div className="soon">Stats turn on once game nights are being logged. Coming next.</div>
-          </section>
+        {joining ? (
+          uid ? <Join code={route.code} uid={uid} />
+              : <section className="tab"><div className="soon">Connecting…</div></section>
+        ) : (
+          <>
+            {tab === 'shelf' && <Shelf games={games} onAdd={() => setTab('add')} />}
+            {tab === 'add' && <AddGame onDone={() => setTab('shelf')} />}
+            {tab === 'night' && <GameNight games={games} uid={uid} />}
+            {tab === 'stats' && <Stats games={games} plays={plays} />}
+          </>
         )}
       </div>
     </>
