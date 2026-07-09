@@ -35,6 +35,22 @@ export function coverFor(name = '') {
   return { c1: `hsl(${hue} 46% 42%)`, c2: `hsl(${(hue + 26) % 360} 52% 25%)` }
 }
 
+// Temporary experiment: box-art placeholders for a few games, so the shelf shows
+// what real cover images look like before BGG auto-fill lands. A game's own
+// `image` field (set via Add/Edit, or later by BGG) always wins over this map.
+// Drop real photos in public/covers/ and set each game's image to e.g.
+// "/covers/catan.jpg" to replace these. Remove this map once BGG art is in.
+const DEMO_COVERS = {
+  Boggle: '/covers/boggle.svg',
+  Carcassonne: '/covers/carcassonne.svg',
+  Catan: '/covers/catan.svg',
+}
+
+// The box-art image URL to show for a game, or null to fall back to the gradient.
+export function coverImageFor(game = {}) {
+  return game.image || DEMO_COVERS[game.name] || null
+}
+
 // ---- localStorage backend ----
 function lsRead() {
   try { return JSON.parse(localStorage.getItem(LS_KEY)) || [] } catch { return [] }

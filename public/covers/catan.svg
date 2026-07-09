@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360" font-family="Georgia, 'Times New Roman', serif">
+  <defs>
+    <linearGradient id="sunset" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b7202a"/><stop offset="0.5" stop-color="#e0662f"/><stop offset="0.72" stop-color="#f0a24a"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff6d8"/><stop offset="1" stop-color="#ffdf8a"/>
+    </radialGradient>
+  </defs>
+  <rect width="300" height="360" fill="url(#sunset)"/>
+  <circle cx="150" cy="205" r="52" fill="url(#sun)"/>
+  <!-- sea -->
+  <rect y="212" width="300" height="30" fill="#8fb8c4" opacity="0.7"/>
+  <!-- land -->
+  <path d="M0 236 Q150 218 300 238 L300 360 L0 360 Z" fill="#8bbf6a"/>
+  <path d="M0 300 Q150 285 300 302 L300 360 L0 360 Z" fill="#c7a24e"/>
+  <g fill="#d8b25a"><path d="M150 300 l10 -16 l10 16 Z"/><path d="M186 306 l10 -16 l10 16 Z"/></g>
+  <text x="150" y="72" text-anchor="middle" font-size="15" letter-spacing="8" fill="#f6d98a">KLAUS TEUBER</text>
+  <text x="150" y="132" text-anchor="middle" font-size="64" font-weight="700" letter-spacing="2" fill="#f7e39a">CATAN</text>
+  <text x="150" y="160" text-anchor="middle" font-size="18" letter-spacing="10" fill="#f3ead2">THE GAME</text>
+</svg>

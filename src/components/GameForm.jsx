@@ -4,7 +4,7 @@ import { coverFor } from '../lib/catalog.js'
 const KINDS = ['Card', 'Strategy', 'Party', 'Dice', 'Dominoes', 'Abstract', 'Family']
 const BLANK = {
   name: '', kind: 'Card', time: 20, minP: 2, maxP: 4,
-  loc: 'either', att: 'semi', setup: 'quick',
+  loc: 'either', att: 'semi', setup: 'quick', image: '',
 }
 
 // Map a stored game doc back into the form's field shape (for editing).
@@ -14,6 +14,7 @@ function fromGame(g) {
     name: g.name || '', kind: g.kind || 'Card',
     time: g.time ?? 20, minP: g.minPlayers ?? '', maxP: g.maxPlayers ?? '',
     loc: g.loc || 'either', att: g.att || 'semi', setup: g.setup || 'quick',
+    image: g.image || '',
   }
 }
 
@@ -52,6 +53,7 @@ export default function GameForm({ mode = 'add', initial, onSubmitCore, onDone, 
       players,
       loc: f.loc, att: f.att, setup: f.setup,
       cover: coverFor(name),
+      image: f.image.trim() || null,
     }
   }
 
@@ -123,6 +125,12 @@ export default function GameForm({ mode = 'add', initial, onSubmitCore, onDone, 
         <Seg value={f.setup} onChange={set('setup')} options={[
           ['instant', 'Instant'], ['quick', 'Quick'], ['involved', 'Involved'],
         ]} />
+      </div>
+      <div className="field">
+        <label htmlFor="gf-image">Box image URL (optional)</label>
+        <input id="gf-image" type="text" placeholder="/covers/catan.jpg or a web link"
+          value={f.image} onChange={(e) => set('image')(e.target.value)} />
+        <span className="hint">Leave blank for a colored box. Real box art auto-fills from BoardGameGeek later.</span>
       </div>
 
       <div className="actions">

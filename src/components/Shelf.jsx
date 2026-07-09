@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { deleteGame, updateGame, playedDaysAgo } from '../lib/catalog.js'
+import { deleteGame, updateGame, playedDaysAgo, coverImageFor } from '../lib/catalog.js'
 import GameForm from './GameForm.jsx'
 
 const agoLabel = (d) =>
@@ -13,18 +13,25 @@ const attLabel = (a) =>
 
 function GameBox({ g, onOpen }) {
   const cover = g.cover || { c1: '#3a3a3a', c2: '#222' }
+  const img = coverImageFor(g)
+  const [broken, setBroken] = useState(false)
+  const showImg = img && !broken
   return (
     <div className="board">
       <button
-        className="gbox"
+        className={`gbox${showImg ? ' hasimg' : ''}`}
         onClick={() => onOpen(g)}
         aria-label={`${g.name} — view details`}
         style={{ background: `linear-gradient(150deg, ${cover.c1}, ${cover.c2})` }}
       >
-        <div className="art">
-          <div className="kind">{g.kind || 'Game'}</div>
-          <div className="name">{g.name}</div>
-        </div>
+        {showImg
+          ? <img className="gbox-img" src={img} alt={g.name} loading="lazy" onError={() => setBroken(true)} />
+          : (
+            <div className="art">
+              <div className="kind">{g.kind || 'Game'}</div>
+              <div className="name">{g.name}</div>
+            </div>
+          )}
         <div className="plate">
           {g.time ? <span className="tnum">{g.time}m</span> : null}
           {g.time && g.players ? <span className="dot" /> : null}
@@ -46,6 +53,10 @@ function GameDetail({ g, onClose }) {
   }, [onClose, editing])
 
   const cover = g.cover || { c1: '#3a3a3a', c2: '#222' }
+  const heroImg = coverImageFor(g)
+  const heroStyle = heroImg
+    ? { backgroundImage: `url(${heroImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+    : { background: `linear-gradient(150deg, ${cover.c1}, ${cover.c2})` }
   const spec = (k, v) => (v ? <div className="spec"><div className="k">{k}</div><div className="v">{v}</div></div> : null)
 
   if (editing) {
@@ -73,7 +84,7 @@ function GameDetail({ g, onClose }) {
   return (
     <div className="scrim" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal" role="dialog" aria-modal="true" aria-label={g.name}>
-        <div className="hero" style={{ background: `linear-gradient(150deg, ${cover.c1}, ${cover.c2})` }}>
+        <div className={`hero${heroImg ? ' hasimg' : ''}`} style={heroStyle}>
           <button className="x" onClick={onClose} aria-label="Close">✕</button>
           <div className="kind">{g.kind || 'Game'}</div>
           <h3>{g.name}</h3>

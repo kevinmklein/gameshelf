@@ -125,8 +125,13 @@ First four are the hard "rule things out" constraints; the rest are soft prefere
 - **Routing:** tiny hash router in `App.jsx`. `#/join/CODE` → voter view (tabs hidden);
   everything else → the normal tabbed app. Hash routing needs no Netlify redirect config.
 - **Dependency added:** `qrcode.react` (real scannable QR for the join link).
+- **Box art:** games may have an optional `image` field (URL or `/covers/*` path) shown on the
+  shelf box + detail hero; falls back to the name-hash gradient `cover`. Set via the Add/Edit
+  form's "Box image URL"; BGG auto-fill will populate it later. `coverImageFor(game)` in
+  catalog.js resolves it, with a temporary `DEMO_COVERS` map (Boggle/Carcassonne/Catan → SVG
+  placeholders in `public/covers/`) for previewing the look before real art lands.
 - **Game doc shape** (`games` collection): `name, kind, time, minPlayers, maxPlayers, players,
-  loc, att, setup, cover{c1,c2}, last, lastPlayed, plays, source, createdAt`. `lastPlayed` is a
+  loc, att, setup, cover{c1,c2}, image, last, lastPlayed, plays, source, createdAt`. `lastPlayed` is a
   real millis timestamp set by `logPlay`; the older `last` (static "days ago") is legacy —
   prefer `playedDaysAgo()`.
 - **Play doc shape** (`plays` collection, implemented): `gameId, gameName, players[], winner,

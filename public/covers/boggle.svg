@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360" font-family="Arial, Helvetica, sans-serif">
+  <rect width="300" height="360" fill="#e8491d"/>
+  <g opacity="0.5" fill="#f26a3f">
+    <rect x="14" y="14" width="40" height="40" rx="8"/><rect x="64" y="14" width="40" height="40" rx="8"/>
+    <rect x="196" y="14" width="40" height="40" rx="8"/><rect x="246" y="14" width="40" height="40" rx="8"/>
+  </g>
+  <text x="150" y="120" text-anchor="middle" font-size="78" font-weight="900" fill="#1f9bd6" stroke="#fff" stroke-width="6" paint-order="stroke" letter-spacing="-4">BOGGLE</text>
+  <g transform="translate(150 210)">
+    <circle cx="-40" cy="0" r="34" fill="#fdf3d0"/><text x="-40" y="12" text-anchor="middle" font-size="34" font-weight="800" fill="#8a8a8a">N</text>
+    <circle cx="35" cy="-6" r="34" fill="#fff"/><text x="35" y="6" text-anchor="middle" font-size="34" font-weight="800" fill="#8a8a8a">W</text>
+    <circle cx="12" cy="52" r="30" fill="#fdf3d0"/><text x="12" y="62" text-anchor="middle" font-size="30" font-weight="800" fill="#8a8a8a">A</text>
+  </g>
+  <rect x="182" y="252" width="104" height="72" rx="9" fill="#f6c027"/>
+  <text x="234" y="278" text-anchor="middle" font-size="15" font-weight="700" fill="#1f6f9c">The 3 minute</text>
+  <text x="234" y="298" text-anchor="middle" font-size="13" font-weight="700" fill="#1f6f9c">word search</text>
+  <text x="234" y="316" text-anchor="middle" font-size="17" font-weight="900" fill="#1f6f9c">GAME</text>
+  <rect x="14" y="322" width="150" height="26" rx="5" fill="#1f9bd6"/>
+  <text x="24" y="340" font-size="14" font-weight="800" fill="#fff">PARKER BROTHERS</text>
+</svg>

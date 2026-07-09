@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 360" width="300" height="360" font-family="Georgia, 'Times New Roman', serif">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fb8e0"/><stop offset="1" stop-color="#cfe8f4"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="360" fill="url(#sky)"/>
+  <g fill="#fff" opacity="0.85">
+    <ellipse cx="70" cy="70" rx="34" ry="15"/><ellipse cx="230" cy="55" rx="40" ry="17"/>
+  </g>
+  <!-- fields -->
+  <rect y="200" width="300" height="160" fill="#8bc34a"/>
+  <path d="M0 200 Q150 175 300 205 L300 260 Q150 240 0 265 Z" fill="#7cb342"/>
+  <rect y="300" width="300" height="60" fill="#6ba838"/>
+  <path d="M60 250 l30 -14 l30 14 l-30 14 Z" fill="#c9963f"/>
+  <path d="M180 268 l34 -16 l34 16 l-34 16 Z" fill="#b07d33"/>
+  <!-- castle -->
+  <g fill="#d7cbb0" stroke="#9c8f74" stroke-width="1">
+    <rect x="120" y="120" width="60" height="46"/>
+    <rect x="112" y="108" width="14" height="58"/><rect x="174" y="108" width="14" height="58"/>
+    <polygon points="112,108 119,92 126,108"/><polygon points="174,108 181,92 188,108"/>
+  </g>
+  <!-- title banner -->
+  <rect x="40" y="34" width="220" height="46" rx="8" fill="#2a4b8d" opacity="0.92"/>
+  <text x="150" y="67" text-anchor="middle" font-size="30" font-style="italic" font-weight="700" fill="#f4d98a">Carcassonne</text>
+  <text x="150" y="150" text-anchor="middle" font-size="11" fill="#5a4a2a" opacity="0.75">Klaus-Jürgen Wrede</text>
+</svg>
