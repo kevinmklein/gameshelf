@@ -7,8 +7,8 @@ recurring **Thursday Game Night** (or any night) easier and less rut-prone.
 
 - **Live app:** https://ourgameshelf.netlify.app  (React + Vite, deployed on Netlify)
 - **Phase 1 prototype** (design reference, voting engine demo): https://ourgameshelf.netlify.app/prototype/
-- **Repo:** its own git repo at `/Users/kevin/Desktop/Projects/gamenight`, remote
-  `github.com/kevinmklein/gamenight`, branch `main`. Isolated from the accidental
+- **Repo:** its own git repo at `/Users/kevin/Desktop/Projects/gameshelf`, remote
+  `github.com/kevinmklein/gameshelf`, branch `main`. Isolated from the accidental
   home-folder repo at `/Users/kevin/.git` — always run git from inside this folder.
 - **Owner:** Kevin (Dad) — *novice web dev*: knows basic git/CLI/Netlify but needs explicit,
   step-by-step CLI + console instructions. Never assume tooling knowledge.
