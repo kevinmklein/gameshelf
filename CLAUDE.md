@@ -26,6 +26,10 @@ crown a zero-vote game → `tally()` now only scores voted games) and de-duplica
 code (`FAMILY`/`colorFor` → `src/lib/family.js`; `Seg`/`Meeple` → `gameNightBits.jsx`;
 `agoLabel` + `FALLBACK_COVER` → `catalog.js`). Verified end-to-end in the browser.
 
+2026-07-09 branding pass: real logo wired into the header (fixed off-white plate, same in
+both themes — see Branding below); generated favicon/apple-touch-icon/manifest icons from the
+logo's book-shelf mark, retiring the placeholder `icon.svg`.
+
 Security note: the Firebase web API key is public by design (it ships in the client bundle);
 it was once committed in git history and flagged by GitHub. It's now **restricted in Google
 Cloud** to the site's referrers, so the alert is dismissible. Never paste the key value into
@@ -70,11 +74,25 @@ Night* (component `GameNight.jsx`, `night.js`, tab id `'night'`) — don't renam
 
 ## PWA / install
 The app is installable: `public/manifest.webmanifest` (display `standalone`, theme `--felt`)
-+ apple-mobile-web-app meta in `index.html`, icon `public/icon.svg` (placeholder meeple —
-**replace with the branding session's real PNG icons** when they land; iOS wants a PNG
-`apple-touch-icon`). No service worker yet (avoids stale-cache surprises), so the automatic
++ apple-mobile-web-app meta in `index.html`. Real branding is wired in: `public/favicon.ico`
++ `favicon-16/32/48.png` (transparent, browser tab), `public/apple-touch-icon.png` (180×180,
+opaque felt-green — iOS fills transparent PNGs with black otherwise), `public/icon-192.png` /
+`icon-512.png` (manifest, opaque felt-green for Android's maskable crop). All four generated
+from `public/brand/logo.png`'s book-shelf mark (see Branding below); the old placeholder
+`icon.svg` is gone. No service worker yet (avoids stale-cache surprises), so the automatic
 install *prompt* won't fire — family "Add to Home Screen" from the browser menu works and
 launches standalone. A scanned QR always opens the browser first; that's inherent to the web.
+
+## Branding
+Real logo lives at `public/brand/logo.png` (947×363, transparent bg, wordmark + a book-shelf
+icon mark). The header (`App.jsx`) shows it directly via `<img class="brand-logo">` — no more
+meeple placeholder. Header is a **fixed off-white plate** (`--header-bg` etc. in `styles.css`,
+defined once outside the theme blocks) so it looks the same in Daylight and Evening; only the
+page below switches. Favicon/apple-touch-icon/manifest icons are cropped from the same file's
+icon mark (left ~427px) — see PWA / install above. If the logo changes, regenerate those with
+the same crop-and-pad approach (icon mark trimmed to its bbox, centered on a square canvas;
+opaque felt-green `#2f4a3a` background for apple-touch-icon + manifest icons, transparent for
+favicons).
 
 ## Locked Decisions
 - **Aesthetic: Cozy tabletop** — felt green (`--felt #2f4a3a`), walnut, brass (`--brass #c6902f`),
