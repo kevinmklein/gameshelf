@@ -116,6 +116,32 @@ update). **Backfill is only ~1/50 done** — Anarchy Pancakes was approved as th
 Kevin runs the rest at `#/backfill` (needs `netlify dev`). Until then, complexity/best-at filters and
 descriptions populate only for synced games.
 
+2026-07-11 bug-bash pass: **backfill is done** — checked the live catalog directly (all 50 games'
+weight/bestPlayers/recommendedPlayers) rather than guessing; 48/50 carry a `bggId`, and the only two
+that don't (Netflix Games, Liar's Dice) aren't real BGG catalog entries, so there's nothing left to
+match. Four fixes off that same data pull: (1) **Complexity filter removed** from the Shelf — BGG's
+absolute 1–5 weight scale put 45/50 games in "Light" (only Catan/Scrabble hit Medium, only Chess hit
+Heavy), so it never narrowed anything for this collection. Kevin's call — dropped rather than retuned.
+`complexityLabel`/`complexityBucket` (`catalog.js`) stay; weight still shows as a spec in the Shelf
+detail modal, `GameInfoModal`, and the Backfill preview. (2) **"★ Plays well at N" toggle removed**
+from the Shelf — `recommendedPlayers` (BGG's poll) is almost always the game's entire supported player
+range, so the toggle (best-at OR recommended) rarely excluded anything. `playsBestAt`/`playsWellAt`
+(`night.js`) stay — still used by `buildBallot`'s best-at-N ballot seeding, and "Best at" still shows
+as a spec. (3) **GameForm image field** no longer requires the full `/covers/filename.jpg` path — a
+bare filename is auto-prefixed with `/covers/` on save (`expandCoversPrefix` in `GameForm.jsx`), and
+stripped back to just the filename for display when editing (`stripCoversPrefix`); full URLs and
+`data:` URIs pass through untouched. (4) **Modal close button (`.x`) made sturdier** — bumped
+32px→40px hit target, raised background opacity + added a white ring + drop shadow so it stays
+legible over any box art (it was nearly invisible on light covers like Balderdash, since the hero's
+darkening gradient only covers the bottom ~65%), plus a small top-right radial scrim behind it on
+image heroes. Shared by the Shelf detail modal, GameForm's edit hero, and `GameInfoModal`.
+
+Also shipped in the same pass — **Game Time polish**: dropped "tonight" from the eligible-games note
+in Set the Table; added a "See the list ▾" toggle that expands to the actual eligible games via
+`BallotBrowseList` + `GameInfoModal` (same tap-for-details popup used in the Lobby), so hosts can
+browse — not just count — while adjusting constraints. `GameNight.jsx` now computes `eligibleGames`
+(not just a count) and passes it to `SetTable`. Verified live in the browser throughout.
+
 Security note: the Firebase web API key is public by design (it ships in the client bundle);
 it was once committed in git history and flagged by GitHub. It's now **restricted in Google
 Cloud** to the site's referrers, so the alert is dismissible. Never paste the key value into
@@ -217,9 +243,10 @@ manifest icons, transparent for favicons).
 | Location | couch / table / either | family tag |
 | Attention | background (half-watch) / semi / focus | family tag |
 | Players | min–max | BGG (auto) / manual |
-| Complexity | 1–5 weight | BGG (auto) |
 | Type (kind) | Card / Strategy / Party / Dice / Dominoes / Abstract / Family / Word Game | BGG + tag |
-First four are the hard "rule things out" constraints; the rest are soft preferences.
+First four are the hard "rule things out" constraints; the rest are soft preferences. Complexity
+(BGG `weight`, 1–5) is captured and shown as a spec, but isn't a Shelf filter — removed 2026-07-11,
+see Current state — the absolute BGG scale didn't discriminate well across this collection.
 
 ## Architecture (implemented)
 - **React + Vite** app at repo root. `npm run dev` (port 5173), `npm run build` → `dist/`.
@@ -346,13 +373,12 @@ Known gaps / follow-ups surfaced while building Game Night:
    set later on the Stats tab. Consider a quick winner-picker on the reveal screen.
 3. **Stats:** edit/remove a logged play (needs `lastPlayed` recompute); per-game "log a play"
    shortcut from the Shelf detail modal.
-4. **BGG auto-fill — steps 1+2 DONE (2026-07-11); step 3 shipped same day** (complexity + best-at-N
-   filters, descriptions in both modals, best-at-N shortlist nudge; min-age deliberately skipped).
-   **Remaining: run the backfill.** The reviewable `#/backfill` tool exists but only ~1/50 games are
-   linked (Anarchy Pancakes, as a write-path test) — Kevin should work through the queue (needs
-   `netlify dev`) so the new filters/descriptions populate across the whole shelf. Optional polish:
-   surface `categories`/`mechanics` as tags; a "best-fit" hint on the Shelf when a bad player-count
-   filter empties the list; consider whether the complexity filter should keep or drop unsynced games.
+4. **BGG auto-fill — steps 1+2 DONE (2026-07-11); step 3 shipped same day; backfill DONE (2026-07-11
+   bug-bash pass)** — 48/50 games carry a `bggId` (the 2 without one, Netflix Games and Liar's Dice,
+   aren't real BGG catalog entries). The Complexity and "Plays well at N" Shelf filters were later
+   **removed** (same pass) — the data didn't discriminate well enough on this collection to be useful
+   as filters; `weight`/`bestPlayers` still show as specs. Optional polish still open: surface
+   `categories`/`mechanics` as tags.
 5. Verified in cloud mode — left a few throwaway test sessions (`CROW-*`, `LYNX-*`, `OWL-748`,
    `HARE-849`) in the `sessions` collection; harmless (random codes, not shown anywhere), clear anytime.
    Better: set a Firestore **TTL policy** on `sessions` keyed to `createdAt` so old rooms
