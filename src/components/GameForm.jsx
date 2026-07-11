@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { coverFor } from '../lib/catalog.js'
 import { Seg } from './gameNightBits.jsx'
+import BggAutofill from './BggAutofill.jsx'
 
 const MAX_DIM = 700
 
@@ -35,7 +36,34 @@ function resizePhoto(file, maxDim = MAX_DIM, quality = 0.82) {
 const KINDS = ['Card', 'Strategy', 'Party', 'Dice', 'Dominoes', 'Abstract', 'Family', 'Word Game']
 const BLANK = {
   name: '', kind: 'Card', time: 20, minP: 2, maxP: 4,
-  loc: 'either', att: 'semi', setup: 'quick', image: '',
+  loc: 'either', att: 'semi', setup: 'quick', image: '', bgg: null,
+}
+
+// BGG-derived fields we persist on a game doc (populated by auto-fill). Kept in a
+// single `f.bgg` bag so the plain-manual form path stays untouched when it's null.
+const BGG_META = ['bggId', 'bggImage', 'weight', 'rating', 'rank', 'minAge',
+  'description', 'year', 'categories', 'mechanics', 'bestPlayers', 'recommendedPlayers']
+
+// Pull stored BGG fields off a game (so editing preserves them), or null if the
+// game was never linked to BoardGameGeek.
+function bggFromGame(g) {
+  if (!g?.bggId) return null
+  const out = {}
+  for (const k of BGG_META) if (g[k] !== undefined) out[k] = g[k]
+  return out
+}
+
+// Shape a freshly-fetched BGG "thing" into the fields we store. `bggImage` is
+// kept SEPARATE from `image` so auto-fill never clobbers curated/uploaded art
+// (coverImageFor prefers `image`, then falls back to `bggImage`).
+function bggFromThing(t) {
+  return {
+    bggId: t.bggId, bggImage: t.image || null,
+    weight: t.weight ?? null, rating: t.rating ?? null, rank: t.rank ?? null,
+    minAge: t.minAge ?? null, description: t.description || '', year: t.year ?? null,
+    categories: t.categories || [], mechanics: t.mechanics || [],
+    bestPlayers: t.bestPlayers ?? null, recommendedPlayers: t.recommendedPlayers || [],
+  }
 }
 
 // Map a stored game doc back into the form's field shape (for editing).
@@ -45,7 +73,7 @@ function fromGame(g) {
     name: g.name || '', kind: g.kind || 'Card',
     time: g.time ?? 20, minP: g.minPlayers ?? '', maxP: g.maxPlayers ?? '',
     loc: g.loc || 'either', att: g.att || 'semi', setup: g.setup || 'quick',
-    image: g.image || '',
+    image: g.image || '', bgg: bggFromGame(g),
   }
 }
 
@@ -62,6 +90,21 @@ export default function GameForm({ mode = 'add', initial, onSubmitCore, onDone, 
 
   const canSave = f.name.trim().length > 0 && !saving && !photoBusy
   const isDataUrl = f.image.startsWith('data:')
+  const bggImg = f.bgg?.bggImage || null
+  const shownImg = f.image || bggImg // curated/uploaded art wins; BGG art is the fallback
+
+  // Apply an auto-fill pick: overwrite the spec fields, stash the BGG metadata,
+  // but deliberately leave `image` (curated art) alone.
+  function applyBgg(t) {
+    setF((s) => ({
+      ...s,
+      name: t.name || s.name,
+      time: t.playingTime ?? s.time,
+      minP: t.minPlayers ?? s.minP,
+      maxP: t.maxPlayers ?? s.maxP,
+      bgg: bggFromThing(t),
+    }))
+  }
 
   async function handlePhoto(e) {
     const file = e.target.files?.[0]
@@ -91,6 +134,8 @@ export default function GameForm({ mode = 'add', initial, onSubmitCore, onDone, 
       loc: f.loc, att: f.att, setup: f.setup,
       cover: coverFor(name),
       image: f.image.trim() || null,
+      // Spread BGG-derived fields (incl. bggImage) when linked; never overwrites `image`.
+      ...(f.bgg?.bggId ? f.bgg : {}),
     }
   }
 
@@ -111,6 +156,11 @@ export default function GameForm({ mode = 'add', initial, onSubmitCore, onDone, 
 
   return (
     <>
+      <BggAutofill
+        onPick={applyBgg}
+        label={mode === 'edit' ? 'Re-sync from BoardGameGeek' : 'Auto-fill from BoardGameGeek'}
+      />
+
       <div className="field">
         <label htmlFor="gf-name">Game name</label>
         <input
@@ -166,7 +216,7 @@ export default function GameForm({ mode = 'add', initial, onSubmitCore, onDone, 
       <div className="field">
         <label>Box art (optional)</label>
         <div className="cover-upload">
-          {f.image && <img className="cover-thumb" src={f.image} alt="" />}
+          {shownImg && <img className="cover-thumb" src={shownImg} alt="" />}
           <label className="btn ghost file-btn">
             {photoBusy ? 'Processing…' : f.image ? 'Change photo' : '📷 Upload a photo'}
             <input type="file" accept="image/*" onChange={handlePhoto} disabled={photoBusy} hidden />
@@ -180,7 +230,11 @@ export default function GameForm({ mode = 'add', initial, onSubmitCore, onDone, 
           <input type="text" style={{ marginTop: 8 }} placeholder="…or paste an image link"
             value={f.image} onChange={(e) => set('image')(e.target.value)} />
         )}
-        <span className="hint">Photos are resized automatically. Real box art auto-fills from BoardGameGeek later.</span>
+        {f.image && bggImg
+          ? <span className="hint">Using your photo. BoardGameGeek art is kept as a fallback.</span>
+          : bggImg
+            ? <span className="hint">Using BoardGameGeek box art — upload a photo to override it.</span>
+            : <span className="hint">Photos are resized automatically and stored with the game.</span>}
       </div>
 
       <div className="actions">

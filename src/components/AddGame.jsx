@@ -7,11 +7,10 @@ export default function AddGame({ onDone }) {
       <div className="eyebrow">Build the collection</div>
       <h2 className="big">Add a Game</h2>
       <p className="lead">
-        Enter what you know and it lands on the shelf right away.
+        Search BoardGameGeek to auto-fill players, time, complexity and box art — or enter it by hand.
         {hasFirebase
           ? ' Saved to the cloud for the whole family.'
           : ' Saved on this device for now — it moves to the cloud once Firebase is connected.'}
-        {' '}Auto-fill from BoardGameGeek (real box art + stats from just the name) arrives once the API token is approved.
       </p>
 
       <div className="panel">

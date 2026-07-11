@@ -40,10 +40,11 @@ export function coverFor(name = '') {
 }
 
 // The box-art image URL to show for a game, or null to fall back to the gradient.
-// A game's `image` field is set via the Add/Edit form (e.g. "/covers/catan.jpg")
-// and will later be auto-filled by BoardGameGeek.
+// Precedence: curated/uploaded `image` (e.g. "/covers/catan.jpg" or a data URL)
+// wins, then BoardGameGeek's `bggImage` (from auto-fill), else the gradient. This
+// is what protects hand-curated art — auto-fill only ever sets `bggImage`.
 export function coverImageFor(game = {}) {
-  return game.image || null
+  return game.image || game.bggImage || null
 }
 
 // ---- localStorage backend ----

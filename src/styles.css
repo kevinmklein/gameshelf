@@ -103,6 +103,18 @@ h2.big{font-size:26px}
 .cover-upload{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .cover-thumb{width:56px;height:56px;object-fit:cover;border-radius:9px;border:1px solid var(--hair);flex:none}
 .file-btn{cursor:pointer;display:inline-flex;align-items:center}
+
+/* BoardGameGeek auto-fill */
+.bgg-autofill{border:1px solid var(--hair);border-radius:12px;padding:14px;background:var(--paper)}
+.bgg-results{list-style:none;margin:10px 0 0;padding:5px;border:1px solid var(--hair);border-radius:10px;background:var(--card);max-height:236px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:2px}
+.bgg-results li button{display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%;text-align:left;background:transparent;border:0;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14.5px;color:var(--ink)}
+.bgg-results li button:hover:not(:disabled){background:var(--paper-2)}
+.bgg-results li button:disabled{opacity:.55;cursor:default}
+.bgg-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bgg-year{color:var(--ink-2);font-variant-numeric:tabular-nums;flex:none;font-size:13px}
+.bgg-picked{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:13.5px;color:var(--ink-2);line-height:1.35}
+.bgg-picked img{width:42px;height:42px;object-fit:cover;border-radius:8px;border:1px solid var(--hair);flex:none}
+.bgg-picked strong{color:var(--ink)}
 .soon{margin-top:22px;background:var(--paper);border:1px dashed var(--hair);border-radius:14px;padding:22px;color:var(--ink-2)}
 .soon a{color:var(--brass-lo)}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--felt);color:#f4ead2;padding:11px 18px;border-radius:11px;font-size:13.5px;font-weight:600;box-shadow:0 10px 24px -8px var(--shadow);z-index:60;animation:fade .2s}
