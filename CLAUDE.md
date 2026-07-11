@@ -13,7 +13,7 @@ recurring **Thursday Game Night** (or any night) easier and less rut-prone.
 - **Owner:** Kevin (Dad) — *novice web dev*: knows basic git/CLI/Netlify but needs explicit,
   step-by-step CLI + console instructions. Never assume tooling knowledge.
 
-## Current state (2026-07-08) — full prototype live, in QA/polish
+## Current state (2026-07-11) — full prototype live, in QA/polish
 **All four tabs are built, wired to Firestore, and live.** Shelf (browse + search + filters +
 real box art + edit/remove), Game Time (real-time async voting), Stats (log + core stats),
 Add a Game. ~20 real games in the DB with a few real cover photos. Cloud-connected: silent
@@ -75,6 +75,26 @@ in `night.js`'s `captainFor()` but only ever shown inline in `RevealResults`' ti
 this week's captain (computed over the full `FAMILY` roster, not just tonight's voters) plus
 "Next up". Verified end-to-end in the browser (including simulating a file upload and a
 touch pull-gesture via injected DOM events).
+
+2026-07-11 BoardGameGeek integration (LIVE, steps 1+2 of 3): the approved BGG XML API is
+wired in end-to-end. A **Netlify Function proxy** (`netlify/functions/bgg.js`) is the ONLY
+place the bearer token is used — it adds `Authorization: Bearer`, solves CORS, parses BGG's
+XML → clean JSON, retries BGG's 202 "queued" responses, and exposes `?op=search` +
+`?op=thing`. (An *authorized* request works from any IP, including this Lambda; the old
+"datacenter IPs are blocked" note only applied to anonymous traffic.) The Add/Edit form
+(`GameForm.jsx`) gained **search → pick → auto-fill** via a new `BggAutofill.jsx` + client
+`src/lib/bgg.js` (base games ranked above fan-expansions). Picking fills players/time and
+stashes rich metadata (weight/complexity, rating, rank, minAge, description, year,
+categories, mechanics, best/recommended player counts) onto the game doc for upcoming
+filters. **Cover protection:** BGG art is stored in a SEPARATE `bggImage` field and
+`coverImageFor` resolves `image` (curated/uploaded) → `bggImage` → gradient, so hand-curated
+covers are never overwritten by a sync. Verified against live BGG (search ranking, auto-fill,
+a Carcassonne re-sync that kept its curated cover) and confirmed live in production (function
++ UI). Local dev needs `netlify dev` (port 8888), not `npm run dev` (plain Vite doesn't serve
+functions). **Step 3 (next session):** surface the metadata — complexity / best-at-N /
+kid-friendly (minAge) filters, descriptions in the detail modal + Game Night's `GameInfoModal`,
+best-at-N into voting eligibility — and **backfill** BGG data onto the existing catalog (a
+reviewable bulk re-sync), since only games added/re-synced since 2026-07-11 carry the new fields.
 
 Security note: the Firebase web API key is public by design (it ships in the client bundle);
 it was once committed in git history and flagged by GitHub. It's now **restricted in Google
@@ -200,6 +220,15 @@ First four are the hard "rule things out" constraints; the rest are soft prefere
     players" — `Shelf.jsx`'s player filter imports it too, don't redefine locally.
   - `src/lib/family.js` — single source of truth for the family roster + player colors
     (`FAMILY`, `colorFor`). Used by Game Night UI and Stats.
+  - `netlify/functions/bgg.js` — the server-side BGG proxy (the ONLY place `BGG_API_TOKEN`
+    is used). Netlify v2 function; `?op=search`/`?op=thing` → clean JSON. Also exports
+    `parseThing`/`parseSearch` for local unit-testing (Netlify ignores the extra exports).
+  - `src/lib/bgg.js` — thin client for the proxy: `bggSearch(q)`, `bggThing(id)`, plus the
+    result ranking that floats base games above fan-expansions. Calls `/.netlify/functions/bgg`
+    only (never BGG directly — token stays server-side, and BGG sends no CORS headers).
+  - `src/components/BggAutofill.jsx` — debounced BGG search box + picker at the top of
+    `GameForm` (add + edit). `onPick(thing)` hands full details up; the form applies them and
+    protects curated art. In edit mode the label is "Re-sync from BoardGameGeek".
   - `src/components/GameNight.jsx` — host flow (Set the Table → Share → Lobby → Reveal).
     On open it re-rolls the room code if `sessionExists()` (codes recycle; reusing a live
     one would resurrect the old session's votes subcollection in the new lobby). Renders the
@@ -223,16 +252,20 @@ First four are the hard "rule things out" constraints; the rest are soft prefere
     `submitVote`, `revealSession`.
 - **Routing:** tiny hash router in `App.jsx`. `#/join/CODE` → voter view (tabs hidden);
   everything else → the normal tabbed app. Hash routing needs no Netlify redirect config.
-- **Dependency added:** `qrcode.react` (real scannable QR for the join link).
-- **Box art:** games may have an optional `image` field (URL or `/covers/*` path) shown on the
-  shelf box + detail hero; falls back to the name-hash gradient `cover`. Set via the Add/Edit
-  form's "Box image URL" (`coverImageFor(game)` in catalog.js resolves it); BGG auto-fill will
-  populate it later. Real photos live in `public/covers/` — Boggle/Carcassonne/Catan have real
-  `.jpg` box art wired up; the rest use gradient boxes until BGG lands.
+- **Dependencies added:** `qrcode.react` (scannable QR for the join link); `fast-xml-parser`
+  (BGG XML→JSON inside the Netlify function).
+- **Box art:** `coverImageFor(game)` resolves with precedence **`image` (curated `/covers/*`
+  path or uploaded data URL) → `bggImage` (BoardGameGeek CDN url from auto-fill) → name-hash
+  gradient `cover`**. Auto-fill only ever writes `bggImage`, so hand-curated art in `image` is
+  never overwritten by a sync. Curated photos live in `public/covers/`; games with no curated
+  art now get BGG box art automatically once linked.
 - **Game doc shape** (`games` collection): `name, kind, time, minPlayers, maxPlayers, players,
   loc, att, setup, cover{c1,c2}, image, last, lastPlayed, plays, source, createdAt`. `lastPlayed` is a
   real millis timestamp set by `logPlay`; the older `last` (static "days ago") is legacy —
-  prefer `playedDaysAgo()`.
+  prefer `playedDaysAgo()`. **BGG-linked games also carry** (from auto-fill, 2026-07-11+):
+  `bggId, bggImage, weight (complexity 1–5), rating, rank, minAge, description, year,
+  categories[], mechanics[], bestPlayers, recommendedPlayers[]`. These are absent on games not
+  yet synced — step-3 features should treat them as optional / backfill first.
 - **Play doc shape** (`plays` collection, implemented): `gameId, gameName, players[], winner,
   minutes, playedAt (millis), createdAt`. `winner` is null for co-op / no-winner nights.
 - **Session doc shape** (`sessions/{code}`, implemented): `phase ('voting'|'revealed'),
@@ -255,15 +288,24 @@ First four are the hard "rule things out" constraints; the rest are soft prefere
   UPPERCASE names**, and env-var changes need a manual "Clear cache and deploy site".
 - `netlify.toml` sets `SECRETS_SCAN_OMIT_KEYS` for these (they're public and get inlined,
   else Netlify's secret scanner fails the build).
+- **`BGG_API_TOKEN`** (7th var, **no `VITE_` prefix**) is server-side only — used by
+  `netlify/functions/bgg.js`. Set in `.env.local` (local, gitignored) + Netlify env vars (prod).
+  Do NOT add it to `SECRETS_SCAN_OMIT_KEYS`: it's genuinely secret and never lands in the client
+  bundle, so the scanner correctly leaves it alone. Local function testing needs `netlify dev`.
 
 ## Intake / BoardGameGeek
-- BGG XML API (since late Oct 2025) **requires a registered app + bearer token**; it also
-  blocks datacenter IPs, so calls must go through a **Netlify Function** proxy (keeps the
-  token secret + solves CORS). Non-commercial registration at boardgamegeek.com/applications/create,
-  approval ~a few days.
-- **Status:** token pending (Kevin registering). Until then, **manual intake works** (Add a
-  Game). When the token arrives: add a Netlify function + name→search→pick→auto-fill
-  (players/time/weight/**real box art**). Goal: add a game in ~15s from just the name.
+- BGG XML API (since late 2025) **requires a registered app + bearer token** on every request.
+  It blocked *anonymous* datacenter traffic, but an **authorized** request (bearer token) works
+  from any IP — including the Netlify Function — so the proxy approach works. The proxy's real
+  jobs: keep the token secret, solve CORS, and parse XML→JSON. Base endpoint
+  `https://boardgamegeek.com/xmlapi2/` (`/search?type=boardgame&query=`, `/thing?stats=1&id=`).
+- **Status (2026-07-11): LIVE.** Token approved and in use. `netlify/functions/bgg.js` proxies
+  `?op=search` / `?op=thing` (clean JSON); `GameForm.jsx` does name→search→pick→auto-fill
+  (players/time/weight/box art + rich metadata) — the ~15s-from-a-name goal, for BGG-listed games.
+  Token lives in `.env.local` (local) + Netlify env var `BGG_API_TOKEN` (prod) — **no `VITE_`
+  prefix**, and deliberately **not** in `SECRETS_SCAN_OMIT_KEYS` (genuinely secret; never lands
+  in the client bundle). Local dev needs `netlify dev` (port 8888). Manual intake still works.
+  See the 2026-07-11 entry above for the full design (cover protection, stored fields, step 3).
 
 ## Deploy Workflow
 Work on `main`. `git add … && git commit && git push` → Netlify auto-builds from `main`
@@ -281,7 +323,12 @@ Known gaps / follow-ups surfaced while building Game Night:
    set later on the Stats tab. Consider a quick winner-picker on the reveal screen.
 3. **Stats:** edit/remove a logged play (needs `lastPlayed` recompute); per-game "log a play"
    shortcut from the Shelf detail modal.
-4. **BGG auto-fill** once the token lands.
+4. **BGG auto-fill — DONE (2026-07-11, steps 1+2).** Remaining **step 3** (next session):
+   surface the captured metadata — complexity / best-at-N / kid-friendly (minAge) filters on the
+   Shelf; descriptions in the detail modal + Game Night's `GameInfoModal`; feed
+   `bestPlayers`/`recommendedPlayers` into Game Night eligibility/shortlist. Also **backfill**
+   BGG data onto the existing catalog (a reviewable name→BGG match + re-sync) so those features
+   have data across the whole shelf, not just newly-added games.
 5. Verified in cloud mode — left a few throwaway test sessions (`CROW-*`, `LYNX-*`, `OWL-748`,
    `HARE-849`) in the `sessions` collection; harmless (random codes, not shown anywhere), clear anytime.
    Better: set a Firestore **TTL policy** on `sessions` keyed to `createdAt` so old rooms
