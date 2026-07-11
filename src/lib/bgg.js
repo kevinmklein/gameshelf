@@ -47,3 +47,21 @@ export async function bggThing(bggId) {
   const { game } = await call(`op=thing&id=${encodeURIComponent(bggId)}`)
   return game
 }
+
+// The BGG-derived fields we persist on a game doc. `bggImage` is kept SEPARATE
+// from `image` so a (re-)sync never clobbers curated/uploaded art — coverImageFor
+// prefers `image`, then falls back to `bggImage`. Single source of truth, shared by
+// the Add/Edit form (GameForm) and the backfill tool.
+export const BGG_META_KEYS = ['bggId', 'bggImage', 'weight', 'rating', 'rank', 'minAge',
+  'description', 'year', 'categories', 'mechanics', 'bestPlayers', 'recommendedPlayers']
+
+// Shape a freshly-fetched BGG "thing" into just those persisted metadata fields.
+export function bggMetaFromThing(t) {
+  return {
+    bggId: t.bggId, bggImage: t.image || null,
+    weight: t.weight ?? null, rating: t.rating ?? null, rank: t.rank ?? null,
+    minAge: t.minAge ?? null, description: t.description || '', year: t.year ?? null,
+    categories: t.categories || [], mechanics: t.mechanics || [],
+    bestPlayers: t.bestPlayers ?? null, recommendedPlayers: t.recommendedPlayers || [],
+  }
+}

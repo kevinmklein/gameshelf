@@ -20,6 +20,11 @@ export default function AddGame({ onDone }) {
           onDone={onDone}
         />
       </div>
+
+      <p className="hint" style={{ marginTop: 18, textAlign: 'center' }}>
+        Have games added before BoardGameGeek sync existed?{' '}
+        <a href="#/backfill" onClick={() => { window.location.hash = '#/backfill' }}>Backfill their BGG data →</a>
+      </p>
     </section>
   )
 }

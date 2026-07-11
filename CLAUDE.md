@@ -96,6 +96,26 @@ kid-friendly (minAge) filters, descriptions in the detail modal + Game Night's `
 best-at-N into voting eligibility — and **backfill** BGG data onto the existing catalog (a
 reviewable bulk re-sync), since only games added/re-synced since 2026-07-11 carry the new fields.
 
+2026-07-11 BGG step 3 (search features — LIVE, backfill in progress): surfaced the captured
+metadata across the app, minus min-age (Kevin's call — Sara & Sophia can play anything and the
+family skips mature themes, so an age filter is a no-op). (1) **Shelf filters:** a new
+**Complexity** select (Light/Medium/Heavy from `weight`, via `complexityBucket`/`complexityLabel`
+in `catalog.js`) and a **"★ Plays well at N"** checkbox that appears once a player count is chosen
+(filters on `playsBestAt`/`playsWellAt` in `night.js`). (2) **Descriptions + complexity + best-at**
+now show in the Shelf detail modal AND Game Night's `GameInfoModal` (both hide the specs when a
+game has no BGG data). `night.js` `snapshot()` now freezes `description/weight/bestPlayers/
+recommendedPlayers/bggImage` onto the ballot so the popup has them. (3) **Game Night shortlist:**
+`buildBallot` seeds a couple of best-at-N games (community best, then recommended) before the
+random variety fill when a player count is set. (4) **Backfill tool** — a reviewable, NON-DESTRUCTIVE
+`#/backfill` route (`Backfill.jsx`, linked from the Add-a-Game tab): walks games with no `bggId`,
+auto-matches each to BGG, previews the data (with a manual-search override), and on approve writes
+ONLY the BGG_META fields (so curated covers/tags/specs are never touched). The BGG field mapping is
+now shared: `BGG_META_KEYS` + `bggMetaFromThing` live in `src/lib/bgg.js` (GameForm + Backfill both
+import them). Verified end-to-end in the browser (filters, both modals, backfill approve→write→live
+update). **Backfill is only ~1/50 done** — Anarchy Pancakes was approved as the write-path proof;
+Kevin runs the rest at `#/backfill` (needs `netlify dev`). Until then, complexity/best-at filters and
+descriptions populate only for synced games.
+
 Security note: the Firebase web API key is public by design (it ships in the client bundle);
 it was once committed in git history and flagged by GitHub. It's now **restricted in Google
 Cloud** to the site's referrers, so the alert is dismissible. Never paste the key value into
@@ -110,8 +130,11 @@ double-click (which truncates at the first `-`).
 |---|---|---|
 | Kevin | Dad | Likes strategy: Catan, Carcassonne |
 | Stacey | Mom | |
-| Sara | Twin, 13 | Family win leader in prototype sample data |
-| Sophia | Twin, 13 | Invents wacky Uno variants |
+| Sara | Daughter, turns 13 wk of 2026-07-18 | Family win leader in prototype sample data |
+| Sophia | Daughter, turns 13 wk of 2026-07-18 | Invents wacky Uno variants |
+Refer to them by name — **Sara** and **Sophia**, not "the twins". At 13 they can play anything the
+family owns; the family doesn't play mature-themed games at all, so **age never gates** — do NOT
+build a min-age / kid-friendly filter (BGG's `minAge` may stay on docs, just don't surface it).
 Guests/extended family add a lightweight profile on the fly (planned: on the Game Night join screen).
 
 ## The Three Features
@@ -323,12 +346,13 @@ Known gaps / follow-ups surfaced while building Game Night:
    set later on the Stats tab. Consider a quick winner-picker on the reveal screen.
 3. **Stats:** edit/remove a logged play (needs `lastPlayed` recompute); per-game "log a play"
    shortcut from the Shelf detail modal.
-4. **BGG auto-fill — DONE (2026-07-11, steps 1+2).** Remaining **step 3** (next session):
-   surface the captured metadata — complexity / best-at-N / kid-friendly (minAge) filters on the
-   Shelf; descriptions in the detail modal + Game Night's `GameInfoModal`; feed
-   `bestPlayers`/`recommendedPlayers` into Game Night eligibility/shortlist. Also **backfill**
-   BGG data onto the existing catalog (a reviewable name→BGG match + re-sync) so those features
-   have data across the whole shelf, not just newly-added games.
+4. **BGG auto-fill — steps 1+2 DONE (2026-07-11); step 3 shipped same day** (complexity + best-at-N
+   filters, descriptions in both modals, best-at-N shortlist nudge; min-age deliberately skipped).
+   **Remaining: run the backfill.** The reviewable `#/backfill` tool exists but only ~1/50 games are
+   linked (Anarchy Pancakes, as a write-path test) — Kevin should work through the queue (needs
+   `netlify dev`) so the new filters/descriptions populate across the whole shelf. Optional polish:
+   surface `categories`/`mechanics` as tags; a "best-fit" hint on the Shelf when a bad player-count
+   filter empties the list; consider whether the complexity filter should keep or drop unsynced games.
 5. Verified in cloud mode — left a few throwaway test sessions (`CROW-*`, `LYNX-*`, `OWL-748`,
    `HARE-849`) in the `sessions` collection; harmless (random codes, not shown anywhere), clear anytime.
    Better: set a Firestore **TTL policy** on `sessions` keyed to `createdAt` so old rooms

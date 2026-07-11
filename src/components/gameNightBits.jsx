@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { captainFor, constraintPills } from '../lib/night.js'
 import { colorFor, FAMILY } from '../lib/family.js'
-import { FALLBACK_COVER, playedDaysAgo, agoLabel, locLabel, attLabel } from '../lib/catalog.js'
+import { FALLBACK_COVER, playedDaysAgo, agoLabel, locLabel, attLabel, complexityLabel } from '../lib/catalog.js'
 
 export function Meeple({ fill = '#fff', size = 20, className }) {
   return (
@@ -154,8 +154,9 @@ export function GameInfoModal({ g, onClose }) {
   }, [onClose])
 
   const cover = g.cover || FALLBACK_COVER
-  const heroStyle = g.image
-    ? { backgroundImage: `url(${g.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+  const heroImg = g.image || g.bggImage || null
+  const heroStyle = heroImg
+    ? { backgroundImage: `url(${heroImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }
     : { background: `linear-gradient(150deg, ${cover.c1}, ${cover.c2})` }
   const spec = (k, v) => (v ? <div className="spec"><div className="k">{k}</div><div className="v">{v}</div></div> : null)
   const d = playedDaysAgo(g)
@@ -163,7 +164,7 @@ export function GameInfoModal({ g, onClose }) {
   return (
     <div className="scrim" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal" role="dialog" aria-modal="true" aria-label={g.name}>
-        <div className={`hero${g.image ? ' hasimg' : ''}`} style={heroStyle}>
+        <div className={`hero${heroImg ? ' hasimg' : ''}`} style={heroStyle}>
           <button className="x" onClick={onClose} aria-label="Close">✕</button>
           <div className="kind">{g.kind || 'Game'}</div>
           <h3>{g.name}</h3>
@@ -172,9 +173,12 @@ export function GameInfoModal({ g, onClose }) {
           <div className="specs">
             {spec('Play time', g.time ? `${g.time} min` : null)}
             {spec('Players', g.players)}
+            {spec('Best at', g.bestPlayers ? `${g.bestPlayers}${String(g.bestPlayers).endsWith('+') ? '' : ' players'}` : null)}
+            {spec('Complexity', complexityLabel(g.weight))}
             {spec('Where', locLabel(g.loc))}
             {spec('Attention', attLabel(g.att))}
           </div>
+          {g.description && <p className="gdesc">{g.description}</p>}
           <div className="played">
             {d == null
               ? 'Never played yet — a fresh face on the shelf.'

@@ -127,6 +127,23 @@ export function attLabel(a) {
   return a === 'background' ? 'Background-OK' : a === 'focus' ? 'Needs focus' : 'Light focus'
 }
 
+// BGG "weight" (average complexity, 1–5) → a coarse bucket for the Shelf filter,
+// or null when the game has no BGG weight yet (not synced/backfilled). Thresholds:
+// under 2 = light, 2–3 = medium, 3+ = heavy — the common BGG reading.
+export function complexityBucket(weight) {
+  if (weight == null || weight === '' || Number.isNaN(Number(weight))) return null
+  const w = Number(weight)
+  return w < 2 ? 'light' : w < 3 ? 'medium' : 'heavy'
+}
+
+// Human label for a weight, e.g. "Medium · 2.4". Null weight → null (show nothing).
+export function complexityLabel(weight) {
+  const b = complexityBucket(weight)
+  if (!b) return null
+  const word = b === 'light' ? 'Light' : b === 'medium' ? 'Medium' : 'Heavy'
+  return `${word} · ${Number(weight).toFixed(1)}`
+}
+
 function lsReadPlays() {
   try { return JSON.parse(localStorage.getItem(PLAYS_KEY)) || [] } catch { return [] }
 }

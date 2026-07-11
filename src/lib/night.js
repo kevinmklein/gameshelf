@@ -14,8 +14,11 @@ function snapshot(g) {
   return {
     id: g.id, name: g.name, kind: g.kind, time: g.time || null,
     players: g.players || '', loc: g.loc || 'either', att: g.att || 'semi',
-    cover: g.cover || FALLBACK_COVER, image: g.image || null,
+    cover: g.cover || FALLBACK_COVER, image: g.image || null, bggImage: g.bggImage || null,
     plays: g.plays || 0, last: g.last ?? null, lastPlayed: g.lastPlayed ?? null,
+    // BGG extras (present once synced/backfilled) — for the read-only info popup.
+    description: g.description || '', weight: g.weight ?? null,
+    bestPlayers: g.bestPlayers ?? null, recommendedPlayers: g.recommendedPlayers || [],
   }
 }
 
@@ -26,6 +29,27 @@ export function seatsPlayers(g, n) {
   if (min != null && n < min) return false
   if (max != null && n > max) return false
   return true
+}
+
+// BGG "suggested players" poll tokens look like "4" or "6+". Does one cover n?
+function countMatches(token, n) {
+  const s = String(token).trim()
+  if (s.endsWith('+')) return n >= parseInt(s, 10)
+  return parseInt(s, 10) === n
+}
+
+// Community-preferred player counts, from BGG's poll (populated by auto-fill /
+// backfill). Each returns null when the game has no BGG data yet, so callers can
+// tell "no, doesn't fit n" apart from "we don't know". Shared by the Shelf's
+// best-fit filter and Game Night's shortlist.
+export function playsBestAt(g, n) {
+  if (g.bestPlayers == null || g.bestPlayers === '') return null
+  return countMatches(g.bestPlayers, n)
+}
+export function playsWellAt(g, n) {
+  const rec = g.recommendedPlayers
+  if (!Array.isArray(rec) || rec.length === 0) return null
+  return rec.some((t) => countMatches(t, n))
 }
 
 // Hard "rule things out" gate → the set eligible tonight.
@@ -52,6 +76,12 @@ export function buildBallot(games, c = {}, size = 8) {
   const add = (g) => { if (g && !picked.find((x) => x.id === g.id) && picked.length < size) picked.push(g) }
   byFav.slice(0, 3).forEach(add)
   byDusty.slice(0, 3).forEach(add)
+  // When a player count is set, seed a couple of games the community says shine at
+  // that count (best first, then merely-recommended) before the random variety fill.
+  if (c.players) {
+    elig.filter((g) => playsBestAt(g, c.players) === true).forEach(add)
+    elig.filter((g) => playsWellAt(g, c.players) === true).forEach(add)
+  }
   const kinds = new Set(picked.map((g) => g.kind))
   shuffle(elig).forEach((g) => { if (picked.length < size && !kinds.has(g.kind)) { add(g); kinds.add(g.kind) } })
   shuffle(elig).forEach(add)

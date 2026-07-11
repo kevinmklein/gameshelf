@@ -6,6 +6,7 @@ import AddGame from './components/AddGame.jsx'
 import Stats from './components/Stats.jsx'
 import GameNight from './components/GameNight.jsx'
 import Join from './components/Join.jsx'
+import Backfill from './components/Backfill.jsx'
 import PullToRefresh from './components/PullToRefresh.jsx'
 
 // Tiny hash router. `#/join/CODE` opens the voter view (shared link/QR target);
@@ -18,7 +19,9 @@ function useRoute() {
     return () => window.removeEventListener('hashchange', on)
   }, [])
   const m = hash.match(/^#\/join\/([A-Za-z0-9-]+)/)
-  return m ? { name: 'join', code: m[1].toUpperCase() } : { name: 'home' }
+  if (m) return { name: 'join', code: m[1].toUpperCase() }
+  if (/^#\/backfill/.test(hash)) return { name: 'backfill' }
+  return { name: 'home' }
 }
 
 export default function App() {
@@ -49,6 +52,7 @@ export default function App() {
   ]
 
   const joining = route.name === 'join'
+  const backfilling = route.name === 'backfill'
 
   return (
     <>
@@ -59,8 +63,8 @@ export default function App() {
         </div>
         <nav className="tabs" role="tablist">
           {tabs.map(([id, label]) => (
-            <button key={id} role="tab" aria-selected={!joining && tab === id}
-              onClick={() => { if (joining) window.location.hash = ''; setTab(id) }}>
+            <button key={id} role="tab" aria-selected={!joining && !backfilling && tab === id}
+              onClick={() => { if (joining || backfilling) window.location.hash = ''; setTab(id) }}>
               {label}
             </button>
           ))}
@@ -70,6 +74,9 @@ export default function App() {
       <div className="wrap">
         {joining ? (
           uid ? <Join code={route.code} uid={uid} />
+              : <section className="tab"><div className="soon">Connecting…</div></section>
+        ) : backfilling ? (
+          uid ? <Backfill />
               : <section className="tab"><div className="soon">Connecting…</div></section>
         ) : (
           <>

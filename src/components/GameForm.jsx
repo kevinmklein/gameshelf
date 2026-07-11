@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { coverFor } from '../lib/catalog.js'
+import { BGG_META_KEYS, bggMetaFromThing } from '../lib/bgg.js'
 import { Seg } from './gameNightBits.jsx'
 import BggAutofill from './BggAutofill.jsx'
 
@@ -39,31 +40,14 @@ const BLANK = {
   loc: 'either', att: 'semi', setup: 'quick', image: '', bgg: null,
 }
 
-// BGG-derived fields we persist on a game doc (populated by auto-fill). Kept in a
-// single `f.bgg` bag so the plain-manual form path stays untouched when it's null.
-const BGG_META = ['bggId', 'bggImage', 'weight', 'rating', 'rank', 'minAge',
-  'description', 'year', 'categories', 'mechanics', 'bestPlayers', 'recommendedPlayers']
-
 // Pull stored BGG fields off a game (so editing preserves them), or null if the
-// game was never linked to BoardGameGeek.
+// game was never linked to BoardGameGeek. Field list + thing-mapping live in
+// bgg.js (BGG_META_KEYS / bggMetaFromThing), shared with the backfill tool.
 function bggFromGame(g) {
   if (!g?.bggId) return null
   const out = {}
-  for (const k of BGG_META) if (g[k] !== undefined) out[k] = g[k]
+  for (const k of BGG_META_KEYS) if (g[k] !== undefined) out[k] = g[k]
   return out
-}
-
-// Shape a freshly-fetched BGG "thing" into the fields we store. `bggImage` is
-// kept SEPARATE from `image` so auto-fill never clobbers curated/uploaded art
-// (coverImageFor prefers `image`, then falls back to `bggImage`).
-function bggFromThing(t) {
-  return {
-    bggId: t.bggId, bggImage: t.image || null,
-    weight: t.weight ?? null, rating: t.rating ?? null, rank: t.rank ?? null,
-    minAge: t.minAge ?? null, description: t.description || '', year: t.year ?? null,
-    categories: t.categories || [], mechanics: t.mechanics || [],
-    bestPlayers: t.bestPlayers ?? null, recommendedPlayers: t.recommendedPlayers || [],
-  }
 }
 
 // Map a stored game doc back into the form's field shape (for editing).
@@ -102,7 +86,7 @@ export default function GameForm({ mode = 'add', initial, onSubmitCore, onDone, 
       time: t.playingTime ?? s.time,
       minP: t.minPlayers ?? s.minP,
       maxP: t.maxPlayers ?? s.maxP,
-      bgg: bggFromThing(t),
+      bgg: bggMetaFromThing(t),
     }))
   }
 
