@@ -42,7 +42,10 @@ button{font-family:inherit}
 /* header — fixed off-white plank; padding-top respects the iOS notch/status bar in standalone PWA mode */
 header.top{background:var(--header-bg);color:var(--header-ink);border-bottom:1px solid var(--header-hair);box-shadow:0 4px 18px var(--shadow);position:relative;padding-top:env(safe-area-inset-top)}
 .brand{max-width:1040px;margin:0 auto;padding:18px 20px 0;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;position:relative;z-index:1}
-.brand-logo{display:block;height:52px;width:auto;flex:none}
+.brand-logo{display:block;height:52px;width:auto;flex:none;transition:transform .2s ease}
+@media(hover:hover){.brand-logo:hover{animation:logo-wiggle .6s ease}}
+.brand-logo:active{transform:scale(.94)}
+@keyframes logo-wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-3deg)}75%{transform:rotate(3deg)}}
 .brand .sub{font-size:12.5px;color:var(--header-ink-2);text-align:right}
 .meeple{width:26px;height:26px;flex:none}
 @media(max-width:560px){.brand{justify-content:flex-start}.brand .sub{text-align:left}}
@@ -106,6 +109,7 @@ h2.big{font-size:26px}
 .gbox .del:hover{background:var(--crit)}
 .empty{padding:44px 30px;text-align:center;color:var(--ink-2);background:var(--paper);border:1px dashed var(--hair);border-radius:16px;margin-top:18px}
 .empty h3{font-size:20px;color:var(--ink);margin-bottom:8px}
+.empty-glyph{font-size:40px;line-height:1;margin-bottom:12px;filter:saturate(.85)}
 
 /* form */
 .panel{background:var(--paper);border:1px solid var(--hair);border-radius:16px;padding:22px;margin-top:18px}
@@ -125,6 +129,8 @@ h2.big{font-size:26px}
 .seg{display:inline-flex;background:var(--card);border:1px solid var(--hair);border-radius:11px;padding:3px;gap:2px;flex-wrap:wrap}
 .seg button{border:0;background:transparent;padding:8px 13px;border-radius:8px;cursor:pointer;font-size:13.5px;font-weight:600;color:var(--ink)}
 .seg button[aria-pressed="true"]{background:var(--felt);color:#f4ead2}
+.seg button{transition:transform .08s ease,background .12s ease}
+.seg button:active{transform:scale(.93)}
 .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;align-items:center}
 .hint{font-size:13px;color:var(--ink-2)}
 .hint.warn{color:#b3432c;display:block;margin-top:6px}
@@ -204,6 +210,8 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{font-family:var(--sans);font-size:14px;font-weight:600;padding:8px 14px;border-radius:20px;cursor:pointer;color:var(--ink);background:var(--card);border:1px solid var(--hair)}
 .chip[aria-pressed="true"]{background:var(--felt);color:#f4ead2;border-color:var(--felt)}
+.chip{transition:transform .08s ease,background .12s ease}
+.chip:active{transform:scale(.95)}
 .guest-add{display:flex;gap:8px;margin-top:10px}
 .guest-add input{font-family:var(--sans);font-size:15px;padding:10px 13px;border:1px solid var(--hair);border-radius:10px;background:var(--card);color:var(--ink);flex:1}
 .guest-add .btn{white-space:nowrap}
@@ -338,10 +346,16 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 .bcard[data-rank]{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)}
 .bcard[data-rank] .pick{color:#20201c;background:var(--brass);align-self:stretch;display:flex;align-items:center;justify-content:center}
 
-.winner-hero{margin-top:18px;background:var(--felt);color:#f4ead2;border-radius:18px;padding:26px 24px;text-align:center;box-shadow:0 16px 34px -18px rgba(0,0,0,.6)}
+.winner-hero{position:relative;overflow:hidden;margin-top:18px;background:var(--felt);color:#f4ead2;border-radius:18px;padding:26px 24px;text-align:center;box-shadow:0 16px 34px -18px rgba(0,0,0,.6)}
+.winner-hero .eyebrow,.winner-hero h2,.winner-hero p{position:relative;z-index:1}
 .winner-hero .eyebrow{color:var(--brass);opacity:.95}
-.winner-hero h2{font-family:var(--disp);font-size:34px;margin-top:4px}
+.winner-hero h2{font-family:var(--disp);font-size:34px;margin-top:4px;animation:winner-pop .55s cubic-bezier(.2,.9,.3,1.5) both}
 .winner-hero p{opacity:.85;margin-top:4px;font-size:14px}
+@keyframes winner-pop{0%{transform:scale(.72);opacity:0}62%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+/* confetti burst (one-shot; pieces get random inline pos/color/timing) */
+.confetti{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.confetti span{position:absolute;top:-12%;opacity:0;animation-name:confetti-fall;animation-timing-function:cubic-bezier(.35,.55,.5,1);animation-fill-mode:forwards}
+@keyframes confetti-fall{0%{opacity:0;top:-12%;transform:translateX(0) rotate(0)}12%{opacity:1}100%{opacity:0;top:108%;transform:translateX(var(--drift)) rotate(var(--rot))}}
 .tie-note{margin-top:14px;background:var(--paper);border:1px solid var(--brass);border-radius:12px;padding:14px 16px;font-size:13.5px;color:var(--ink-2);line-height:1.5}
 .tie-note b{color:var(--ink)}
 .results{display:flex;flex-direction:column;gap:12px;margin-top:18px}

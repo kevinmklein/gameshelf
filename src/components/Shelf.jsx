@@ -238,13 +238,15 @@ export default function Shelf({ games, onAdd }) {
 
       {games.length === 0 ? (
         <div className="empty">
-          <h3>Your shelf is empty</h3>
-          <p>Add your first game and it'll appear here as a box on the shelf.</p>
-          <button className="btn brass" style={{ marginTop: 14 }} onClick={onAdd}>＋ Add a game</button>
+          <div className="empty-glyph" aria-hidden="true">📚</div>
+          <h3>The shelf’s looking bare</h3>
+          <p>Add your first game and it’ll show up here as a box on the shelf — ready for game night.</p>
+          <button className="btn brass" style={{ marginTop: 14 }} onClick={onAdd}>＋ Add your first game</button>
         </div>
       ) : filtered.length === 0 ? (
         <div className="empty">
-          <p>No games match {q ? `“${q}”` : 'those filters'}.</p>
+          <div className="empty-glyph" aria-hidden="true">🔍</div>
+          <p>Nothing matches {q ? `“${q}”` : 'those filters'} — try loosening up.</p>
           {(activeCount > 0 || q) && (
             <button className="btn ghost" style={{ marginTop: 12 }}
               onClick={() => { setF(NO_FILTERS); setQ('') }}>Clear search & filters</button>

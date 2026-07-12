@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { captainFor, constraintPills } from '../lib/night.js'
 import { colorFor, FAMILY } from '../lib/family.js'
 import { FALLBACK_COVER, playedDaysAgo, agoLabel, locLabel, complexityLabel, minAgeLabel } from '../lib/catalog.js'
@@ -263,6 +263,42 @@ export function Lobby({
   )
 }
 
+// A one-shot confetti burst for the winner reveal — the emotional peak of the app.
+// Pure CSS animation on randomized pieces; skipped entirely under reduced-motion.
+const CONFETTI_COLORS = ['#c6902f', '#3f7d52', '#b1503a', '#a8761f', '#f4ead2', '#dfa94b']
+function Confetti({ count = 28 }) {
+  const pieces = useMemo(() => {
+    const reduce = typeof window !== 'undefined'
+      && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (reduce) return []
+    return Array.from({ length: count }, (_, i) => ({
+      left: Math.random() * 100,
+      bg: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      delay: Math.random() * 0.45,
+      dur: 1.3 + Math.random() * 0.9,
+      drift: (Math.random() * 2 - 1) * 44,
+      rot: (Math.random() * 2 - 1) * 320,
+      w: 6 + Math.random() * 5,
+      h: 8 + Math.random() * 7,
+      round: Math.random() < 0.3,
+    }))
+  }, [count])
+  if (!pieces.length) return null
+  return (
+    <div className="confetti" aria-hidden="true">
+      {pieces.map((p, i) => (
+        <span key={i} style={{
+          left: `${p.left}%`, background: p.bg,
+          width: `${p.w}px`, height: `${p.h}px`,
+          borderRadius: p.round ? '50%' : '1px',
+          animationDelay: `${p.delay}s`, animationDuration: `${p.dur}s`,
+          '--drift': `${p.drift}px`, '--rot': `${p.rot}deg`,
+        }} />
+      ))}
+    </div>
+  )
+}
+
 // The reveal: winner hero, freshness-annotated results, weekly Captain tiebreak note.
 export function RevealResults({ results, voterNames = [] }) {
   const barsRef = useRef(null)
@@ -283,6 +319,7 @@ export function RevealResults({ results, voterNames = [] }) {
   return (
     <>
       <div className="winner-hero">
+        <Confetti />
         <div className="eyebrow">Tonight we play</div>
         <h2>{w.name}</h2>
         <p>{w.time ? `${w.time} min` : ''}{w.players ? ` · ${w.players} players` : ''} · {w.kind}</p>

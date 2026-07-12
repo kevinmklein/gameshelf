@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { logPlay, playedDaysAgo, agoLabel, hasFirebase } from '../lib/catalog.js'
 import { FAMILY, colorFor } from '../lib/family.js'
 import { captainFor } from '../lib/night.js'
@@ -11,6 +11,26 @@ function formatDur(min) {
   const h = Math.floor(min / 60)
   const m = min % 60
   return h ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`
+}
+
+// Animate a number from 0 → target once (ease-out). Honors reduced-motion by
+// jumping straight to the value. Used for the headline stat cards.
+function useCountUp(target, duration = 900) {
+  const [val, setVal] = useState(0)
+  useEffect(() => {
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (reduce || !target) { setVal(target); return }
+    let raf, start
+    const tick = (t) => {
+      if (!start) start = t
+      const p = Math.min((t - start) / duration, 1)
+      setVal(Math.round(target * (1 - Math.pow(1 - p, 3))))
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [target, duration])
+  return val
 }
 
 // ---- the "log a game night" form ----
@@ -160,6 +180,8 @@ function Dashboard({ games, plays }) {
     return { nights, totalMin, winRows, mostPlayed, kindRows, dusty }
   }, [games, plays])
 
+  const nightsCount = useCountUp(s.nights)
+  const minutesCount = useCountUp(s.totalMin)
   const maxWins = s.winRows[0]?.[1] || 1
   const maxKind = s.kindRows[0]?.[1] || 1
   const captain = useMemo(() => captainFor(FAMILY), [])
@@ -169,11 +191,11 @@ function Dashboard({ games, plays }) {
     <>
       <div className="statgrid">
         <div className="statcard">
-          <div className="num tnum">{s.nights}</div>
+          <div className="num tnum">{nightsCount}</div>
           <div className="lbl">Game Times logged</div>
         </div>
         <div className="statcard">
-          <div className="num tnum">{formatDur(s.totalMin)}</div>
+          <div className="num tnum">{formatDur(minutesCount)}</div>
           <div className="lbl">Time at the table</div>
         </div>
         <div className="statcard">
