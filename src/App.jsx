@@ -60,7 +60,11 @@ export default function App() {
     <>
       <header className="top">
         <div className="brand">
-          <img className="brand-logo" src="/brand/logo.png" alt="Game Shelf" />
+          <button type="button" className="brand-home"
+            onClick={() => { window.location.hash = ''; setTab('shelf') }}
+            aria-label="Go to Our Shelf">
+            <img className="brand-logo" src="/brand/logo.png" alt="Game Shelf" />
+          </button>
           <div className="sub">The Klein family collection · Thursday Game Night HQ</div>
         </div>
         <nav className="tabs" role="tablist">

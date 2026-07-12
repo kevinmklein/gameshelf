@@ -42,6 +42,8 @@ button{font-family:inherit}
 /* header — fixed off-white plank; padding-top respects the iOS notch/status bar in standalone PWA mode */
 header.top{background:var(--header-bg);color:var(--header-ink);border-bottom:1px solid var(--header-hair);box-shadow:0 4px 18px var(--shadow);position:relative;padding-top:env(safe-area-inset-top)}
 .brand{max-width:1040px;margin:0 auto;padding:18px 20px 0;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;position:relative;z-index:1}
+.brand-home{background:none;border:0;padding:0;margin:0;cursor:pointer;line-height:0;flex:none;border-radius:8px}
+.brand-home:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
 .brand-logo{display:block;height:52px;width:auto;flex:none;transition:transform .2s ease}
 @media(hover:hover){.brand-logo:hover{animation:logo-wiggle .6s ease}}
 .brand-logo:active{transform:scale(.94)}
@@ -260,7 +262,14 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 .match-jump:hover{background:var(--brass);color:#fff;border-color:var(--brass)}
 .match-jump:active{transform:scale(.96)}
 .match-none{align-self:flex-end;color:var(--ink-2);font-size:13px;font-weight:600;padding:8px 2px;white-space:nowrap}
-@media(max-width:560px){.filt{flex:1;min-width:calc(50% - 5px)}.filt select{min-width:0;width:100%}}
+@media(max-width:560px){
+  .filt{flex:1;min-width:calc(50% - 5px)}
+  .filt select{min-width:0;width:100%}
+  /* the count + Clear span the row and share it evenly — a right-aligned small
+     Clear next to a bigger count reads like a defect on a phone */
+  .filt-result{width:100%;margin-left:0}
+  .filt-result .match-jump,.filt-result .clear-filters{flex:1;justify-content:center;text-align:center}
+}
 
 /* Backfill maintenance tool */
 .bf-progress{margin-top:16px;font-size:13px;color:var(--ink-2)}
@@ -301,7 +310,7 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 
 .soft-head{margin-top:20px;padding-top:16px;border-top:1px solid var(--hair)}
 .soft-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:none;border:0;padding:2px 0;cursor:pointer;text-align:left}
-.soft-chev{color:var(--brass-lo);font-size:12px;flex:none}
+.soft-chev{color:var(--brass-lo);font-size:13px;flex:none;line-height:1}
 .soft-eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink,var(--brass-lo));font-weight:700;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
 .soft-tag{font-size:9.5px;letter-spacing:.08em;background:var(--paper-2);border:1px solid var(--hair);border-radius:20px;padding:1px 7px;color:var(--ink-2)}
 .soft-tag.on{background:color-mix(in srgb,var(--felt) 14%,var(--card));border-color:color-mix(in srgb,var(--felt) 35%,var(--hair));color:var(--felt)}

@@ -178,7 +178,7 @@ function SetTable({ c, setC, eligibleGames, games, onOpen, busy }) {
           🎲 That leaves <b className="tnum">{count}</b> game{count === 1 ? '' : 's'} on the table.
           {count > 0 && (
             <button type="button" className="link-toggle" onClick={() => setShowList((v) => !v)}>
-              {showList ? 'Hide the list ▲' : 'See the list ▾'}
+              {showList ? 'Hide the list ▲' : 'See the list ▼'}
             </button>
           )}
         </div>
@@ -195,7 +195,7 @@ function SetTable({ c, setC, eligibleGames, games, onOpen, busy }) {
               Set the mood <span className="soft-tag">optional</span>
               {!showMood && moodSet > 0 && <span className="soft-tag on">{moodSet} on</span>}
             </span>
-            <span className="soft-chev" aria-hidden="true">{showMood ? '▲' : '▾'}</span>
+            <span className="soft-chev" aria-hidden="true">{showMood ? '▲' : '▼'}</span>
           </button>
           {showMood && (
             <p className="hint" style={{ margin: '8px 0 0' }}>
