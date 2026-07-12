@@ -302,6 +302,7 @@ function Confetti({ count = 28 }) {
 // The reveal: winner hero, freshness-annotated results, weekly Captain tiebreak note.
 export function RevealResults({ results, voterNames = [] }) {
   const barsRef = useRef(null)
+  const [burst, setBurst] = useState(0) // tap the winner to fire the confetti again (Sara & Sophia favorite)
   useEffect(() => {
     const el = barsRef.current
     if (el) requestAnimationFrame(() => el.querySelectorAll('.rbar').forEach((x) => { x.style.width = x.dataset.w + '%' }))
@@ -318,10 +319,12 @@ export function RevealResults({ results, voterNames = [] }) {
 
   return (
     <>
-      <div className="winner-hero">
-        <Confetti />
+      <div className="winner-hero" onClick={() => setBurst((b) => b + 1)}
+        role="button" tabIndex={0} title="Tap for more confetti!"
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setBurst((b) => b + 1) } }}>
+        <Confetti key={`confetti-${burst}`} />
         <div className="eyebrow">Tonight we play</div>
-        <h2>{w.name}</h2>
+        <h2 key={`name-${burst}`}>{w.name}</h2>
         <p>{w.time ? `${w.time} min` : ''}{w.players ? ` · ${w.players} players` : ''} · {w.kind}</p>
       </div>
       {tie && (
