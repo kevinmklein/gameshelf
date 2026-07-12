@@ -209,7 +209,14 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 .guest-add .btn{white-space:nowrap}
 
 .statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
-@media(max-width:560px){.statgrid{grid-template-columns:1fr}}
+@media(max-width:560px){
+  /* two numeric stats side-by-side, the text-heavy "most played" full-width below —
+     cuts the tall stacked scroll before the leaderboard */
+  .statgrid{grid-template-columns:1fr 1fr}
+  .statgrid .statcard:last-child{grid-column:1/-1}
+  .statcard{padding:15px 12px}
+  .statcard .num{font-size:26px}
+}
 .statcard{background:var(--paper);border:1px solid var(--hair);border-radius:16px;padding:18px 20px;text-align:center}
 .statcard .num{font-family:var(--disp);font-size:30px;font-weight:700;color:var(--ink);line-height:1.05}
 .statcard .lbl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2);font-weight:700;margin-top:8px}
@@ -275,10 +282,21 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 .step.on .num{background:var(--brass);color:#20201c;border-color:var(--brass)}
 .step.done .num{background:var(--felt);color:#f4ead2;border-color:var(--felt)}
 .step:not(:last-child)::after{content:"→";margin-left:8px;color:var(--hair)}
+/* narrow phones: the three labels won't fit on one line — keep the numbered track,
+   show words only for the step you're on (a clean "you are here" tracker) */
+@media(max-width:560px){
+  .stepper{gap:7px;justify-content:center}
+  .step{font-size:12.5px;gap:6px}
+  .step:not(.on) .step-label{display:none}
+  .step:not(:last-child)::after{margin-left:7px}
+}
 
 .soft-head{margin-top:20px;padding-top:16px;border-top:1px solid var(--hair)}
-.soft-eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-lo);font-weight:700;display:inline-flex;align-items:center;gap:8px}
+.soft-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;background:none;border:0;padding:2px 0;cursor:pointer;text-align:left}
+.soft-chev{color:var(--brass-lo);font-size:12px;flex:none}
+.soft-eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink,var(--brass-lo));font-weight:700;display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
 .soft-tag{font-size:9.5px;letter-spacing:.08em;background:var(--paper-2);border:1px solid var(--hair);border-radius:20px;padding:1px 7px;color:var(--ink-2)}
+.soft-tag.on{background:color-mix(in srgb,var(--felt) 14%,var(--card));border-color:color-mix(in srgb,var(--felt) 35%,var(--hair));color:var(--felt)}
 .eligible-note{margin-top:18px;padding-top:14px;border-top:1px solid var(--hair);font-size:15px;color:var(--ink-2)}
 .eligible-note b{color:var(--ink)}
 .link-toggle{background:none;border:0;color:var(--brass-lo);font-weight:600;font-size:14px;cursor:pointer;padding:0 0 0 8px;text-decoration:underline}
@@ -372,6 +390,19 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
   .grid2 > .field,.field{min-width:0}
   .field input,.field select{min-width:0}
   .guest-add input{min-width:0}
+  /* keep the primary "Open the table →" action reachable while scrolling the long
+     Set-the-Table form — it sticks to the bottom over a soft parchment backdrop */
+  .setup-actions{position:sticky;bottom:0;z-index:6;flex-direction:column;align-items:stretch;gap:8px;margin:22px -14px 0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);border-top:1px solid var(--hair)}
+  .setup-actions .btn{width:100%;padding:14px 18px}
+  .setup-actions .hint{text-align:center}
+}
+/* comfier tap targets for small text-links on touch devices (≥44px where sensible) */
+@media (hover:none) and (pointer:coarse){
+  .clear-filters,.match-jump{padding:11px 14px}
+  .del-link{padding:10px 6px}
+  .backlink{padding:8px 2px 12px}
+  .soft-toggle{min-height:44px}
+  .link-toggle{display:inline-block;padding:4px 6px}
 }
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

@@ -15,7 +15,7 @@ function Stepper({ cur }) {
     <div className="stepper">
       {STEPS.map((s, i) => (
         <span key={s} className={`step ${cur === i ? 'on' : ''} ${cur > i ? 'done' : ''}`}>
-          <span className="num">{cur > i ? '✓' : i + 1}</span>{s}
+          <span className="num">{cur > i ? '✓' : i + 1}</span><span className="step-label">{s}</span>
         </span>
       ))}
     </div>
@@ -121,8 +121,10 @@ export default function GameNight({ games, uid }) {
 function SetTable({ c, setC, eligibleGames, games, onOpen, busy }) {
   const set = (k) => (v) => setC((s) => ({ ...s, [k]: v }))
   const [showList, setShowList] = useState(false)
+  const [showMood, setShowMood] = useState(false)
   const [openGame, setOpenGame] = useState(null)
   const count = eligibleGames.length
+  const moodSet = [c.effort, c.vibe, c.setup].filter(Boolean).length
   const kinds = [...new Set(games.map((g) => g.kind).filter(Boolean))].sort()
   if (!games.length) {
     return <div className="soon">Add a few games on the <b>Add a Game</b> tab first — Game Time
@@ -187,31 +189,44 @@ function SetTable({ c, setC, eligibleGames, games, onOpen, busy }) {
           </div>
         )}
         <div className="soft-head">
-          <span className="soft-eyebrow">Set the mood <span className="soft-tag">optional</span></span>
-          <p className="hint" style={{ margin: '2px 0 0' }}>
-            These don’t rule anything out — they just tilt tonight’s shortlist toward what you’re in the mood for.
-          </p>
+          <button type="button" className="soft-toggle" aria-expanded={showMood}
+            onClick={() => setShowMood((v) => !v)}>
+            <span className="soft-eyebrow">
+              Set the mood <span className="soft-tag">optional</span>
+              {!showMood && moodSet > 0 && <span className="soft-tag on">{moodSet} on</span>}
+            </span>
+            <span className="soft-chev" aria-hidden="true">{showMood ? '▲' : '▾'}</span>
+          </button>
+          {showMood && (
+            <p className="hint" style={{ margin: '8px 0 0' }}>
+              These don’t rule anything out — they just tilt tonight’s shortlist toward what you’re in the mood for.
+            </p>
+          )}
         </div>
-        <div className="field">
-          <label>How much brain tonight?</label>
-          <Seg value={c.effort} onChange={set('effort')} options={[
-            ['light', '🪶 Chill'], ['medium', '⚖️ Medium'], ['heavy', '🧠 Big strategy'], [null, 'Any'],
-          ]} />
-        </div>
-        <div className="field">
-          <label>What’s the mood?</label>
-          <Seg value={c.vibe} onChange={set('vibe')} options={[
-            ['calm', '🌙 Calm & quiet'], ['lively', '🎉 Loud & laughing'], [null, 'Any'],
-          ]} />
-        </div>
-        <div className="field">
-          <label>How fast to get going?</label>
-          <Seg value={c.setup} onChange={set('setup')} options={[
-            ['instant', '⚡ Instant'], ['quick', '🎲 Quick'], ['involved', '🧩 Involved'], [null, 'Any'],
-          ]} />
-        </div>
+        {showMood && (
+          <>
+            <div className="field">
+              <label>How much brain tonight?</label>
+              <Seg value={c.effort} onChange={set('effort')} options={[
+                ['light', '🪶 Chill'], ['medium', '⚖️ Medium'], ['heavy', '🧠 Big strategy'], [null, 'Any'],
+              ]} />
+            </div>
+            <div className="field">
+              <label>What’s the mood?</label>
+              <Seg value={c.vibe} onChange={set('vibe')} options={[
+                ['calm', '🌙 Calm & quiet'], ['lively', '🎉 Loud & laughing'], [null, 'Any'],
+              ]} />
+            </div>
+            <div className="field">
+              <label>How fast to get going?</label>
+              <Seg value={c.setup} onChange={set('setup')} options={[
+                ['instant', '⚡ Instant'], ['quick', '🎲 Quick'], ['involved', '🧩 Involved'], [null, 'Any'],
+              ]} />
+            </div>
+          </>
+        )}
       </div>
-      <div className="actions">
+      <div className="actions setup-actions">
         <button className="btn brass" disabled={count < 2 || busy} onClick={onOpen}>
           {busy ? 'Opening…' : 'Open the table →'}
         </button>
