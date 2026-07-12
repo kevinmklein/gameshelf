@@ -45,11 +45,11 @@ nav.tabs button{background:transparent;border:0;color:var(--header-ink-2);cursor
 nav.tabs button[aria-selected="true"]{color:var(--ink);background:var(--bg)}
 nav.tabs button[aria-selected="true"]::before{content:"";position:absolute;left:12px;right:12px;top:6px;height:3px;background:var(--brass);border-radius:3px}
 nav.tabs button:not([aria-selected="true"]):hover{color:var(--header-ink)}
-/* narrow phones: tabs scroll sideways instead of wrapping/overflowing */
+/* narrow phones: all four tabs stay fixed and share the width evenly (no sideways scroll) */
 @media(max-width:560px){
-  nav.tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
-  nav.tabs::-webkit-scrollbar{display:none}
-  nav.tabs button{padding:10px 12px 14px;font-size:14px}
+  nav.tabs{gap:2px;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}
+  nav.tabs button{flex:1;text-align:center;padding:10px 4px 13px;font-size:13px}
+  nav.tabs button[aria-selected="true"]::before{left:8px;right:8px}
 }
 
 section.tab{padding-top:26px;animation:fade .4s ease}
@@ -318,8 +318,8 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
   .field input[type=text],.field input[type=number],.field input[type=date],.field select,
   input.search,.filt select,.linkbox input,.guest-add input{font-size:16px}
   input.search{padding-left:35px}
-  /* comfier tap targets (Apple HIG: ≥44px) */
-  .seg button{padding:10px 14px}
+  /* comfier tap targets (Apple HIG: ≥44px) — grow height, not width, so segs don't wrap worse */
+  .seg button{padding:11px 12px}
   .chip{padding:10px 15px}
   .bgg-results li button{padding:11px 10px}
 }
@@ -327,6 +327,16 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 @media(max-width:560px){
   .h-row .search-wrap{width:100%}
   input.search{width:100%}
+  /* segmented controls span the field and share width so wrapped rows justify cleanly
+     instead of leaving orphan buttons ("Any", "Word Game") stranded on their own line */
+  .seg{display:flex;width:100%}
+  .seg button{flex:1 1 auto;text-align:center;white-space:nowrap}
+  /* forms: let date/number/select inputs shrink inside grid & flex tracks (iOS gives them a
+     wide intrinsic min-width, which overflowed the .grid2 columns in Log a Game Time) */
+  .grid2{min-width:0}
+  .grid2 > .field,.field{min-width:0}
+  .field input,.field select{min-width:0}
+  .guest-add input{min-width:0}
 }
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
