@@ -260,6 +260,28 @@ good. Files: `src/lib/focus.js` (labels + `derivedFocus`/`focusOf`), `night.js` 
 Legacy `att` field stays on docs (harmless, unused by the gate); `attLabel` in `catalog.js` is dead
 but left in place. **Classifier is a heuristic first pass — Kevin pins outliers via the Edit form.**
 
+2026-07-12 mobile/iOS optimization pass (CSS-only, `styles.css` + no logic changes): (1) **iOS
+input auto-zoom killed** — any focused control under 16px makes iOS Safari zoom the page in and
+leave it zoomed; a `@media (hover:none) and (pointer:coarse)` block bumps every text control
+(`.field` inputs/selects, `input.search`, `.filt select`, `.linkbox input`, `.guest-add input`)
+to 16px on touch devices only, so desktop keeps the tighter sizes. Same block grows tap targets
+(Seg buttons, chips, BGG result rows) toward Apple's 44px guideline. (2) **Sticky-hover fix** —
+the `.gbox:hover` lift transform is now wrapped in `@media(hover:hover)` (on iOS, :hover sticks
+after a tap, so game boxes stayed floating after closing the modal); added a subtle `:active`
+scale for touch feedback instead. (3) **`touch-action:manipulation`** on buttons/controls/gbox/
+bcard — kills the double-tap-zoom delay and accidental page-zoom on fast repeated taps (voting
+Segs); buttons also get `user-select:none` + no long-press callout. (4) **Tab nav scrolls
+sideways** under 560px (nowrap + hidden scrollbar) — 4 tabs overflowed 375px screens; "Add a
+Game" peeking off-edge is the scroll affordance. (5) **Safe-area insets everywhere `viewport-fit=
+cover` needs them** — `.wrap`/`.brand`/`nav.tabs` left+right (landscape notch), `.wrap` + `.toast`
++ `.scrim` bottom (home-indicator bar). (6) Misc: `#root` min-height 100dvh fallback (URL-bar
+resize), `-webkit-text-size-adjust:100%` (landscape font inflation), transparent tap highlight,
+`overscroll-behavior:contain` on `.modal` + `.bgg-results` (no background scroll-chaining),
+search box full-width on phones, `.wrap` side padding 20→14px under 560px. Verified at 375×812
+in the browser (shelf, detail modal, Game Time Set-the-Table, Add-a-Game form, tab-bar scroll,
+zero horizontal overflow, CSSOM confirms the coarse-pointer rules parsed; the 16px/tap-target
+block itself needs a real touch device — the desktop preview doesn't emulate coarse pointers).
+
 Security note: the Firebase web API key is public by design (it ships in the client bundle);
 it was once committed in git history and flagged by GitHub. It's now **restricted in Google
 Cloud** to the site's referrers, so the alert is dismissible. Never paste the key value into

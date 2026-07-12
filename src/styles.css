@@ -14,15 +14,20 @@
 }
 
 *{box-sizing:border-box}
-body{margin:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;-webkit-tap-highlight-color:transparent}
+/* buttons + form controls: no double-tap-zoom delay, no long-press text-selection callout */
+button,select,input[type=checkbox],input[type=radio],.gbox,.bcard{touch-action:manipulation}
+button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 #root{
-  font-family:var(--sans); color:var(--ink); min-height:100vh;
+  font-family:var(--sans); color:var(--ink); min-height:100vh; min-height:100dvh;
   background:
     radial-gradient(1200px 500px at 50% -10%, color-mix(in srgb,var(--brass) 10%, transparent), transparent 60%),
     linear-gradient(var(--bg),var(--bg-2));
   -webkit-font-smoothing:antialiased; line-height:1.5;
 }
-.wrap{max-width:1040px;margin:0 auto;padding:0 20px 72px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px calc(72px + env(safe-area-inset-bottom));padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
+@media(max-width:560px){.wrap{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}}
 h1,h2,h3{font-family:var(--disp);font-weight:600;text-wrap:balance;margin:0}
 .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-lo);font-weight:700}
 button{font-family:inherit}
@@ -30,16 +35,22 @@ button{font-family:inherit}
 
 /* header — fixed off-white plank; padding-top respects the iOS notch/status bar in standalone PWA mode */
 header.top{background:var(--header-bg);color:var(--header-ink);border-bottom:1px solid var(--header-hair);box-shadow:0 4px 18px var(--shadow);position:relative;padding-top:env(safe-area-inset-top)}
-.brand{max-width:1040px;margin:0 auto;padding:18px 20px 0;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;position:relative;z-index:1}
+.brand{max-width:1040px;margin:0 auto;padding:18px 20px 0;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;position:relative;z-index:1}
 .brand-logo{display:block;height:52px;width:auto;flex:none}
 .brand .sub{font-size:12.5px;color:var(--header-ink-2);text-align:right}
 .meeple{width:26px;height:26px;flex:none}
 @media(max-width:560px){.brand{justify-content:flex-start}.brand .sub{text-align:left}}
-nav.tabs{max-width:1040px;margin:0 auto;padding:14px 20px 0;display:flex;gap:4px;position:relative;z-index:1}
-nav.tabs button{background:transparent;border:0;color:var(--header-ink-2);cursor:pointer;padding:10px 16px 14px;font-size:14.5px;font-weight:600;font-family:var(--disp);border-radius:9px 9px 0 0;position:relative}
+nav.tabs{max-width:1040px;margin:0 auto;padding:14px 20px 0;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));display:flex;gap:4px;position:relative;z-index:1}
+nav.tabs button{background:transparent;border:0;color:var(--header-ink-2);cursor:pointer;padding:10px 16px 14px;font-size:14.5px;font-weight:600;font-family:var(--disp);border-radius:9px 9px 0 0;position:relative;white-space:nowrap}
 nav.tabs button[aria-selected="true"]{color:var(--ink);background:var(--bg)}
 nav.tabs button[aria-selected="true"]::before{content:"";position:absolute;left:12px;right:12px;top:6px;height:3px;background:var(--brass);border-radius:3px}
 nav.tabs button:not([aria-selected="true"]):hover{color:var(--header-ink)}
+/* narrow phones: tabs scroll sideways instead of wrapping/overflowing */
+@media(max-width:560px){
+  nav.tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-left:max(10px,env(safe-area-inset-left));padding-right:max(10px,env(safe-area-inset-right))}
+  nav.tabs::-webkit-scrollbar{display:none}
+  nav.tabs button{padding:10px 12px 14px;font-size:14px}
+}
 
 section.tab{padding-top:26px;animation:fade .4s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
@@ -64,7 +75,9 @@ h2.big{font-size:26px}
 .board.rowend::after{content:"";display:block;height:16px;margin-top:2px;border-radius:0 0 6px 6px;background:linear-gradient(var(--walnut),var(--walnut-dk));box-shadow:0 8px 14px -6px var(--shadow)}
 .gbox{position:relative;border-radius:9px 9px 4px 4px;overflow:hidden;cursor:pointer;text-align:left;border:1px solid rgba(0,0,0,.18);padding:0;width:100%;box-shadow:0 6px 12px -6px var(--shadow);transition:transform .16s ease,box-shadow .16s ease;display:flex;flex-direction:column;aspect-ratio:3/3.6;color:#fff}
 .gbox:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
-.gbox:hover{transform:translateY(-6px);box-shadow:0 16px 24px -10px var(--shadow)}
+/* hover-only on real pointers — on touch, :hover sticks after a tap and the box stays lifted */
+@media(hover:hover){.gbox:hover{transform:translateY(-6px);box-shadow:0 16px 24px -10px var(--shadow)}}
+.gbox:active{transform:scale(.985)}
 .gbox .art{flex:1;padding:12px;display:flex;flex-direction:column;justify-content:space-between;position:relative}
 .gbox .art::before{content:"";position:absolute;inset:0;opacity:.16;background:radial-gradient(circle at 30% 20%,#fff,transparent 45%)}
 .gbox .kind{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;opacity:.9;position:relative}
@@ -75,6 +88,7 @@ h2.big{font-size:26px}
 .gbox .plate .dot{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.6}
 .gbox .del{position:absolute;top:7px;right:7px;background:rgba(0,0,0,.4);border:0;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px;opacity:0;transition:opacity .15s;z-index:2}
 .gbox:hover .del{opacity:1}
+@media(hover:none){.gbox .del{opacity:1}}
 .gbox .del:hover{background:var(--crit)}
 .empty{padding:44px 30px;text-align:center;color:var(--ink-2);background:var(--paper);border:1px dashed var(--hair);border-radius:16px;margin-top:18px}
 .empty h3{font-size:20px;color:var(--ink);margin-bottom:8px}
@@ -106,7 +120,7 @@ h2.big{font-size:26px}
 
 /* BoardGameGeek auto-fill */
 .bgg-autofill{border:1px solid var(--hair);border-radius:12px;padding:14px;background:var(--paper)}
-.bgg-results{list-style:none;margin:10px 0 0;padding:5px;border:1px solid var(--hair);border-radius:10px;background:var(--card);max-height:236px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:2px}
+.bgg-results{list-style:none;margin:10px 0 0;padding:5px;border:1px solid var(--hair);border-radius:10px;background:var(--card);max-height:236px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:flex;flex-direction:column;gap:2px}
 .bgg-results li button{display:flex;justify-content:space-between;align-items:baseline;gap:12px;width:100%;text-align:left;background:transparent;border:0;padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14.5px;color:var(--ink)}
 .bgg-results li button:hover:not(:disabled){background:var(--paper-2)}
 .bgg-results li button:disabled{opacity:.55;cursor:default}
@@ -117,7 +131,7 @@ h2.big{font-size:26px}
 .bgg-picked strong{color:var(--ink)}
 .soon{margin-top:22px;background:var(--paper);border:1px dashed var(--hair);border-radius:14px;padding:22px;color:var(--ink-2)}
 .soon a{color:var(--brass-lo)}
-.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--felt);color:#f4ead2;padding:11px 18px;border-radius:11px;font-size:13.5px;font-weight:600;box-shadow:0 10px 24px -8px var(--shadow);z-index:60;animation:fade .2s}
+.toast{position:fixed;bottom:calc(22px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:var(--felt);color:#f4ead2;padding:11px 18px;border-radius:11px;font-size:13.5px;font-weight:600;box-shadow:0 10px 24px -8px var(--shadow);z-index:60;animation:fade .2s}
 /* pull-to-refresh */
 .ptr-indicator{display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:13px;font-weight:700;color:var(--ink-2);transition:height .18s ease;text-align:center}
 /* search box */
@@ -129,8 +143,8 @@ input.search:hover{border-color:var(--brass-lo)}
 input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;border-color:var(--brass)}
 
 /* detail modal */
-.scrim{position:fixed;inset:0;background:rgba(20,15,5,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50;animation:fade .18s ease}
-.modal{background:var(--card);border-radius:16px;max-width:440px;width:100%;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 30px 60px -20px rgba(0,0,0,.5);border:1px solid var(--hair);animation:pop .22s cubic-bezier(.2,.8,.2,1)}
+.scrim{position:fixed;inset:0;background:rgba(20,15,5,.55);display:flex;align-items:center;justify-content:center;padding:18px;padding-top:max(18px,env(safe-area-inset-top));padding-bottom:max(18px,env(safe-area-inset-bottom));z-index:50;animation:fade .18s ease}
+.modal{background:var(--card);border-radius:16px;max-width:440px;width:100%;max-height:calc(100vh - 36px);max-height:calc(100dvh - 36px);overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-shadow:0 30px 60px -20px rgba(0,0,0,.5);border:1px solid var(--hair);animation:pop .22s cubic-bezier(.2,.8,.2,1)}
 @keyframes pop{from{transform:scale(.96);opacity:.4}to{transform:scale(1);opacity:1}}
 .modal .hero{padding:22px;color:#fff;position:relative}
 .modal .hero.hasimg{min-height:180px;display:flex;flex-direction:column;justify-content:flex-end}
@@ -296,5 +310,23 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 .waiting p{color:var(--ink-2);font-size:14px;margin-top:6px;max-width:34ch;margin-left:auto;margin-right:auto}
 .join-tally{font-size:12.5px;color:var(--ink-2);font-weight:600;margin:14px 0}
 .idchip{cursor:pointer}
+
+/* ---- touch devices (iPhone/iPad) ---- */
+/* 16px is the magic number: any focused control below it makes iOS Safari zoom
+   the whole page in — and leave it zoomed. Bump every text control to 16px. */
+@media (hover:none) and (pointer:coarse){
+  .field input[type=text],.field input[type=number],.field input[type=date],.field select,
+  input.search,.filt select,.linkbox input,.guest-add input{font-size:16px}
+  input.search{padding-left:35px}
+  /* comfier tap targets (Apple HIG: ≥44px) */
+  .seg button{padding:10px 14px}
+  .chip{padding:10px 15px}
+  .bgg-results li button{padding:11px 10px}
+}
+/* phones: search box goes full-width instead of a 220px stub */
+@media(max-width:560px){
+  .h-row .search-wrap{width:100%}
+  input.search{width:100%}
+}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
