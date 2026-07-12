@@ -101,7 +101,7 @@ h2.big{font-size:26px}
 .gbox .name{font-family:var(--disp);font-size:19px;line-height:1.05;font-weight:600;position:relative;text-shadow:0 1px 3px rgba(0,0,0,.35)}
 .gbox .plate{background:rgba(0,0,0,.28);padding:7px 10px;display:flex;gap:8px;font-size:11px;font-weight:600;align-items:center;flex-wrap:wrap}
 .gbox-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
-.gbox.hasimg .plate{position:absolute;left:0;right:0;bottom:0;z-index:1;background:linear-gradient(transparent,rgba(0,0,0,.62))}
+.gbox.hasimg .plate{position:absolute;left:0;right:0;bottom:0;z-index:1;padding-top:16px;text-shadow:0 1px 2px rgba(0,0,0,.55);background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,.5) 45%,transparent)}
 .gbox .plate .dot{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.6}
 .gbox .del{position:absolute;top:7px;right:7px;background:rgba(0,0,0,.4);border:0;color:#fff;width:26px;height:26px;border-radius:50%;cursor:pointer;font-size:14px;opacity:0;transition:opacity .15s;z-index:2}
 .gbox:hover .del{opacity:1}
@@ -346,7 +346,12 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 .bcard[data-rank]{border-color:var(--brass);box-shadow:0 0 0 1px var(--brass)}
 .bcard[data-rank] .pick{color:#20201c;background:var(--brass);align-self:stretch;display:flex;align-items:center;justify-content:center}
 
-.winner-hero{position:relative;overflow:hidden;margin-top:18px;background:var(--felt);color:#f4ead2;border-radius:18px;padding:26px 24px;text-align:center;box-shadow:0 16px 34px -18px rgba(0,0,0,.6)}
+.winner-hero{position:relative;overflow:hidden;margin-top:18px;color:#f4ead2;border-radius:18px;padding:26px 24px;text-align:center;box-shadow:0 16px 34px -18px rgba(0,0,0,.6);
+  /* a whisper of felt weave: two faint crosshatched threads over the green */
+  background:
+    repeating-linear-gradient(45deg,rgba(255,255,255,.022) 0 2px,transparent 2px 4px),
+    repeating-linear-gradient(-45deg,rgba(0,0,0,.035) 0 2px,transparent 2px 4px),
+    var(--felt)}
 .winner-hero .eyebrow,.winner-hero h2,.winner-hero p{position:relative;z-index:1}
 .winner-hero .eyebrow{color:var(--brass);opacity:.95}
 .winner-hero h2{font-family:var(--disp);font-size:34px;margin-top:4px;animation:winner-pop .55s cubic-bezier(.2,.9,.3,1.5) both}
