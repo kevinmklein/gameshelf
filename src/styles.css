@@ -225,6 +225,12 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 .filt select{font-family:var(--sans);font-size:14px;letter-spacing:normal;text-transform:none;font-weight:500;padding:8px 11px;border:1px solid var(--hair);border-radius:9px;background:var(--card);color:var(--ink);min-width:112px}
 .clear-filters{align-self:flex-end;background:transparent;border:1px solid var(--hair);color:var(--ink-2);font-weight:600;font-size:13px;padding:8px 13px;border-radius:9px;cursor:pointer}
 .clear-filters:hover{color:var(--ink);border-color:var(--ink-2)}
+/* live "N matches ↓" widget beside Clear — click to jump to the first result */
+.filt-result{display:flex;align-items:flex-end;gap:8px;margin-left:auto}
+.match-jump{align-self:flex-end;background:var(--card);border:1px solid var(--brass);color:var(--brass-lo);font-weight:700;font-size:13px;padding:8px 12px;border-radius:9px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.match-jump:hover{background:var(--brass);color:#fff;border-color:var(--brass)}
+.match-jump:active{transform:scale(.96)}
+.match-none{align-self:flex-end;color:var(--ink-2);font-size:13px;font-weight:600;padding:8px 2px;white-space:nowrap}
 @media(max-width:560px){.filt{flex:1;min-width:calc(50% - 5px)}.filt select{min-width:0;width:100%}}
 
 /* Backfill maintenance tool */

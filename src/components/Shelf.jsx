@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   deleteGame, updateGame, playedDaysAgo, agoLabel, coverImageFor, locLabel,
   complexityLabel, minAgeLabel, FALLBACK_COVER,
@@ -132,7 +132,7 @@ function GameDetail({ g, onClose }) {
 
 const NO_FILTERS = { players: '', loc: '', time: '', kind: '' }
 
-function FilterBar({ f, setF, kinds, active, onClear }) {
+function FilterBar({ f, setF, kinds, active, onClear, matchCount, onJump }) {
   const set = (k) => (e) => setF((s) => ({ ...s, [k]: e.target.value }))
   return (
     <div className="filterbar">
@@ -169,7 +169,17 @@ function FilterBar({ f, setF, kinds, active, onClear }) {
         </select>
       </label>
       {active > 0 && (
-        <button type="button" className="clear-filters" onClick={onClear}>Clear ✕</button>
+        <div className="filt-result">
+          {matchCount > 0 ? (
+            <button type="button" className="match-jump" onClick={onJump}
+              title="Jump to the first match">
+              <span className="tnum">{matchCount}</span> match{matchCount === 1 ? '' : 'es'} <span aria-hidden="true">↓</span>
+            </button>
+          ) : (
+            <span className="match-none">No matches</span>
+          )}
+          <button type="button" className="clear-filters" onClick={onClear}>Clear ✕</button>
+        </div>
       )}
     </div>
   )
@@ -179,6 +189,7 @@ export default function Shelf({ games, onAdd }) {
   const [q, setQ] = useState('')
   const [f, setF] = useState(NO_FILTERS)
   const [selected, setSelected] = useState(null)
+  const shelfRef = useRef(null)
 
   const kinds = useMemo(
     () => [...new Set(games.map((g) => g.kind).filter(Boolean))].sort(),
@@ -221,7 +232,8 @@ export default function Shelf({ games, onAdd }) {
 
       {games.length > 0 && (
         <FilterBar f={f} setF={setF} kinds={kinds} active={activeCount}
-          onClear={() => setF(NO_FILTERS)} />
+          onClear={() => setF(NO_FILTERS)} matchCount={filtered.length}
+          onJump={() => shelfRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
       )}
 
       {games.length === 0 ? (
@@ -239,7 +251,7 @@ export default function Shelf({ games, onAdd }) {
           )}
         </div>
       ) : (
-        <div className="shelf">
+        <div className="shelf" ref={shelfRef}>
           {filtered.map((g) => <GameBox key={g.id} g={g} onOpen={setSelected} />)}
         </div>
       )}
