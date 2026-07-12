@@ -65,7 +65,7 @@ export default function App() {
         </div>
         <nav className="tabs" role="tablist">
           {tabs.map(([id, label]) => (
-            <button key={id} role="tab" aria-selected={!joining && !backfilling && tab === id}
+            <button key={id} role="tab" data-tab={id} aria-selected={!joining && !backfilling && tab === id}
               onClick={() => { if (joining || backfilling) window.location.hash = ''; setTab(id) }}>
               {label}
             </button>
@@ -73,7 +73,7 @@ export default function App() {
         </nav>
       </header>
 
-      <div className="wrap">
+      <div className="wrap" data-section={joining ? 'join' : backfilling ? 'shelf' : tab}>
         {joining ? (
           uid ? <Join code={route.code} uid={uid} />
               : <section className="tab"><div className="soon">Connecting…</div></section>

@@ -28,8 +28,14 @@ button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 }
 .wrap{max-width:1040px;margin:0 auto;padding:0 20px calc(72px + env(safe-area-inset-bottom));padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right))}
 @media(max-width:560px){.wrap{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}}
+/* per-section accent — each tab is its own "room": brass shelf, felt table, walnut ledger.
+   --accent = the color, --accent-ink = a readable-on-parchment variant for text/labels. */
+.wrap[data-section="shelf"]{--accent:var(--brass);--accent-ink:var(--brass-lo)}
+.wrap[data-section="night"]{--accent:var(--felt);--accent-ink:var(--felt)}
+.wrap[data-section="stats"]{--accent:var(--walnut);--accent-ink:var(--walnut)}
+.wrap[data-section="join"]{--accent:var(--felt);--accent-ink:var(--felt)}
 h1,h2,h3{font-family:var(--disp);font-weight:600;text-wrap:balance;margin:0}
-.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--brass-lo);font-weight:700}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent-ink,var(--brass-lo));font-weight:700}
 button{font-family:inherit}
 .tnum{font-variant-numeric:tabular-nums}
 
@@ -43,8 +49,16 @@ header.top{background:var(--header-bg);color:var(--header-ink);border-bottom:1px
 nav.tabs{max-width:1040px;margin:0 auto;padding:14px 20px 0;padding-left:max(20px,env(safe-area-inset-left));padding-right:max(20px,env(safe-area-inset-right));display:flex;gap:4px;position:relative;z-index:1}
 nav.tabs button{background:transparent;border:0;color:var(--header-ink-2);cursor:pointer;padding:10px 16px 14px;font-size:14.5px;font-weight:600;font-family:var(--disp);border-radius:9px 9px 0 0;position:relative;white-space:nowrap}
 nav.tabs button[aria-selected="true"]{color:var(--ink);background:var(--bg)}
-nav.tabs button[aria-selected="true"]::before{content:"";position:absolute;left:12px;right:12px;top:6px;height:3px;background:var(--brass);border-radius:3px}
+nav.tabs button[aria-selected="true"]::before{content:"";position:absolute;left:12px;right:12px;top:6px;height:3px;background:var(--brass);border-radius:3px;transform-origin:center;animation:stripe-in .28s cubic-bezier(.2,.8,.2,1)}
 nav.tabs button:not([aria-selected="true"]):hover{color:var(--header-ink)}
+/* subtle per-section identity: stripe color + a whisper of tint on the active tab */
+nav.tabs button[data-tab="shelf"][aria-selected="true"]{background:color-mix(in srgb,var(--brass) 7%,var(--bg))}
+nav.tabs button[data-tab="shelf"][aria-selected="true"]::before{background:var(--brass)}
+nav.tabs button[data-tab="night"][aria-selected="true"]{background:color-mix(in srgb,var(--felt) 9%,var(--bg))}
+nav.tabs button[data-tab="night"][aria-selected="true"]::before{background:var(--felt)}
+nav.tabs button[data-tab="stats"][aria-selected="true"]{background:color-mix(in srgb,var(--walnut) 9%,var(--bg))}
+nav.tabs button[data-tab="stats"][aria-selected="true"]::before{background:var(--walnut)}
+@keyframes stripe-in{from{transform:scaleX(.25);opacity:0}to{transform:scaleX(1);opacity:1}}
 /* narrow phones: all four tabs stay fixed and share the width evenly (no sideways scroll) */
 @media(max-width:560px){
   nav.tabs{gap:2px;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}
