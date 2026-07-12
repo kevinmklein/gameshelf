@@ -143,13 +143,13 @@ function SetTable({ c, setC, eligibleGames, games, onOpen, busy }) {
         <div className="field">
           <label>What kind of game?</label>
           <Seg value={c.kind} onChange={set('kind')} options={[
-            [null, 'Any'], ...kinds.map((k) => [k, k]),
+            ...kinds.map((k) => [k, k]), [null, 'Any'],
           ]} />
         </div>
         <div className="field">
           <label>How long have we got?</label>
           <Seg value={c.maxTime} onChange={set('maxTime')} options={[
-            [15, 'Quick · 15m'], [30, 'A bit · 30m'], [60, 'An hour'], [120, 'Long haul · 2hr'], [null, 'No limit'],
+            [15, 'Quick · 15m'], [30, 'A bit · 30m'], [60, 'An hour'], [120, 'Committed · 2hr'], [null, 'No limit'],
           ]} />
         </div>
         <div className="field">
