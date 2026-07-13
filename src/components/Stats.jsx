@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { logPlay, playedDaysAgo, agoLabel, hasFirebase } from '../lib/catalog.js'
+import { logPlay, updatePlay, deletePlay, playedDaysAgo, agoLabel, hasFirebase } from '../lib/catalog.js'
 import { FAMILY, colorFor } from '../lib/family.js'
 import { captainFor } from '../lib/night.js'
 import { Avatar } from './gameNightBits.jsx'
@@ -151,8 +151,161 @@ function LogPlay({ games }) {
   )
 }
 
+// ---- edit / delete an existing logged play ----
+function EditPlay({ games, play, plays, onClose }) {
+  const [gameId, setGameId] = useState(play.gameId || '')
+  const [date, setDate] = useState(
+    play.playedAt ? new Date(play.playedAt).toISOString().slice(0, 10) : todayISO()
+  )
+  // Seed the roster with the family plus any guests captured on this play.
+  const [roster, setRoster] = useState(() =>
+    [...FAMILY, ...(play.players || []).filter((n) => !FAMILY.includes(n))]
+  )
+  const [present, setPresent] = useState(play.players || [])
+  const [winner, setWinner] = useState(play.winner || '')
+  const [minutes, setMinutes] = useState(play.minutes ? String(play.minutes) : '')
+  const [guest, setGuest] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [confirmDel, setConfirmDel] = useState(false)
+
+  const game = games.find((g) => g.id === gameId)
+  const sorted = useMemo(() => [...games].sort((a, b) => a.name.localeCompare(b.name)), [games])
+  const canSave = gameId && present.length > 0 && !busy
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  function togglePresent(name) {
+    setPresent((p) => {
+      const next = p.includes(name) ? p.filter((n) => n !== name) : [...p, name]
+      if (!next.includes(winner)) setWinner('')
+      return next
+    })
+  }
+  function addGuest() {
+    const name = guest.trim()
+    if (!name || roster.includes(name)) { setGuest(''); return }
+    setRoster((r) => [...r, name]); setPresent((p) => [...p, name]); setGuest('')
+  }
+
+  async function save() {
+    if (!canSave) return
+    setBusy(true)
+    await updatePlay(play, {
+      gameId,
+      gameName: game.name,
+      players: present,
+      winner: winner || null,
+      minutes: Number(minutes) || game.time || null,
+      playedAt: new Date(date + 'T12:00:00').getTime(),
+    }, plays)
+    onClose()
+  }
+  async function remove() {
+    setBusy(true)
+    await deletePlay(play, plays)
+    onClose()
+  }
+
+  return (
+    <div className="scrim" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="modal" role="dialog" aria-modal="true" aria-label={`Edit ${play.gameName}`}>
+        <div className="hero" style={{ background: 'var(--felt)' }}>
+          <button className="x" onClick={onClose} aria-label="Cancel">✕</button>
+          <div className="kind">Edit this Game Time</div>
+          <h3>{play.gameName}</h3>
+        </div>
+        <div className="body">
+          <div className="field">
+            <label htmlFor="ed-game">What did you play?</label>
+            <select id="ed-game" value={gameId} onChange={(e) => setGameId(e.target.value)}>
+              {sorted.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+            </select>
+          </div>
+
+          <div className="grid2">
+            <div className="field">
+              <label htmlFor="ed-date">When?</label>
+              <input id="ed-date" type="date" max={todayISO()} value={date}
+                onChange={(e) => setDate(e.target.value)} />
+            </div>
+            <div className="field">
+              <label htmlFor="ed-min">How long? (minutes)</label>
+              <input id="ed-min" type="number" min="1" max="600"
+                placeholder={game?.time ? `${game.time} (typical)` : 'minutes'}
+                value={minutes} onChange={(e) => setMinutes(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="field">
+            <label>Who played?</label>
+            <div className="chips">
+              {roster.map((name) => (
+                <button key={name} type="button" className="chip"
+                  aria-pressed={present.includes(name)} onClick={() => togglePresent(name)}>
+                  {name}
+                </button>
+              ))}
+            </div>
+            <div className="guest-add">
+              <input type="text" placeholder="Add a guest…" value={guest}
+                onChange={(e) => setGuest(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addGuest() } }} />
+              <button type="button" className="btn ghost" onClick={addGuest} disabled={!guest.trim()}>
+                ＋ Add
+              </button>
+            </div>
+          </div>
+
+          <div className="field">
+            <label htmlFor="ed-win">Who won?</label>
+            <select id="ed-win" value={winner} onChange={(e) => setWinner(e.target.value)}>
+              <option value="">Co-op / no single winner</option>
+              {present.map((name) => <option key={name} value={name}>{name}</option>)}
+            </select>
+          </div>
+
+          <div className="modal-foot">
+            {confirmDel ? (
+              <div className="del-confirm">
+                <span className="hint">Delete this log?</span>
+                <button className="btn danger" disabled={busy} onClick={remove}>
+                  {busy ? 'Removing…' : 'Yes, delete'}
+                </button>
+                <button className="btn ghost" disabled={busy} onClick={() => setConfirmDel(false)}>Keep</button>
+              </div>
+            ) : (
+              <>
+                <button className="btn ghost danger-text" disabled={busy} onClick={() => setConfirmDel(true)}>
+                  🗑 Delete
+                </button>
+                <button className="btn brass" disabled={!canSave} onClick={save}>
+                  {busy ? 'Saving…' : 'Save changes'}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const RECENT_PREVIEW = 8
+
+// Short date label for a logged play, e.g. "Jul 9".
+function playDateLabel(ms) {
+  if (!ms) return ''
+  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
 // ---- the core-stats dashboard ----
 function Dashboard({ games, plays }) {
+  const [editing, setEditing] = useState(null)   // the play currently being edited
+  const [showAll, setShowAll] = useState(false)
   const s = useMemo(() => {
     const nights = plays.length
     const totalMin = plays.reduce((a, p) => a + (p.minutes || 0), 0)
@@ -281,20 +434,32 @@ function Dashboard({ games, plays }) {
           <div className="eyebrow">The log</div>
           <h3 className="stat-h">Recent Game Times</h3>
           <div className="lb">
-            {plays.slice(0, 8).map((p) => (
-              <div className="plrow" key={p.id}>
+            {(showAll ? plays : plays.slice(0, RECENT_PREVIEW)).map((p) => (
+              <button className="plrow plrow-btn" key={p.id} onClick={() => setEditing(p)}
+                aria-label={`Edit ${p.gameName} log`}>
                 <div className="plmain">
                   <b>{p.gameName}</b>
                   <span className="plmeta">
+                    {p.playedAt ? ` · ${playDateLabel(p.playedAt)}` : ''}
                     {p.players?.length ? ` · ${p.players.length} players` : ''}
                     {p.minutes ? ` · ${formatDur(p.minutes)}` : ''}
                   </span>
                 </div>
                 <div className="plwin">{p.winner ? `🏆 ${p.winner}` : 'co-op'}</div>
-              </div>
+                <span className="pledit" aria-hidden="true">✎</span>
+              </button>
             ))}
           </div>
+          {plays.length > RECENT_PREVIEW && (
+            <button className="btn ghost show-all" onClick={() => setShowAll((v) => !v)}>
+              {showAll ? 'Show fewer' : `Show all ${plays.length}`}
+            </button>
+          )}
         </div>
+      )}
+
+      {editing && (
+        <EditPlay games={games} play={editing} plays={plays} onClose={() => setEditing(null)} />
       )}
     </>
   )

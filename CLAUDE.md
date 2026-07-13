@@ -338,6 +338,34 @@ mood" and "See the list", matching the `▲` collapse glyph. **Confetti + count-
 tap-target/16px rules can't be seen in the desktop preview (it doesn't capture fast overlays or
 emulate touch) — verify on a real device.** All new motion honors `prefers-reduced-motion`.
 
+2026-07-12 edit/delete logged plays (LIVE): closed the long-standing gap (Next-up #2/#3) — you can
+now **edit or delete a Recent Game Time**. Each recent-log row is a button (subtle ✎, brightens on
+hover) that opens an **`EditPlay` modal** (`Stats.jsx`) — the same `.scrim`/`.modal` pattern as the
+Shelf, reusing the log form's fields pre-filled (game, date, minutes, who-played chips + guests,
+winner); **Save changes** + a **🗑 Delete** with a Yes/Keep confirm. Rows now also show the play
+**date** (`playDateLabel`, e.g. "Jul 12") so entries are distinguishable. **The hard part — stats
+recompute** (CLAUDE.md had flagged this as the blocker for edit/delete): a new `reconcileGame(gameId,
+countDelta, remaining)` in `catalog.js` recomputes the game's `lastPlayed` from its *remaining* logged
+plays (null → falls back to legacy `last`) and deltas the `plays` counter (−1 on delete; moves the +1
+between games when an edit changes the game; 0 when only date/details change) — deltas rather than
+overwrites so any seeded counts survive. Kept in `catalog.js` (not pushed through `updateGame`)
+because `increment()` is a Firestore sentinel meaningless to the localStorage backend, same as
+`logPlay`. New public API: `updatePlay(prev, patch, allPlays)` + `deletePlay(play, allPlays)` (callers
+pass the live log so the affected game(s) reconcile without waiting for the subscription round-trip).
+**Compaction:** the recent list was already capped at `slice(0, 8)`; kept 8 as the default preview and
+added a **"Show all N"** toggle (`showAll` state) to expand/collapse the full history, so the page
+never grows unbounded. The deeper scaling limit is the *data* read — `subscribePlays` pulls every play
+doc (the aggregate stats need them all) — fine into the low thousands (~52 plays/yr); revisit with a
+`limit()` + pagination only once the log passes a few hundred rows (years out). Verified against the
+live app (rows render as edit buttons with dates; the popup opens and fully pre-populates game/date/
+minutes/players/winner; closes cleanly; no console errors) — **the actual Save/Delete round-trip was
+NOT run against the real 4-play family log** to avoid mutating it; the recompute paths are sound by
+construction (create→edit→delete a throwaway entry to confirm count/`lastPlayed` restore if desired).
+Files: `Stats.jsx` (EditPlay modal + clickable rows + Show-all + date label), `catalog.js`
+(`reconcileGame`/`updatePlay`/`deletePlay`), `styles.css` (`.plrow-btn`/`.pledit`/`.show-all`/
+`.del-confirm`/`.btn.danger`). Still open (Next-up #3): a per-game "log a play" shortcut from the
+Shelf detail modal.
+
 Security note: the Firebase web API key is public by design (it ships in the client bundle);
 it was once committed in git history and flagged by GitHub. It's now **restricted in Google
 Cloud** to the site's referrers, so the alert is dismissible. Never paste the key value into

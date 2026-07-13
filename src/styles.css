@@ -249,6 +249,19 @@ input.search:focus-visible{outline:3px solid var(--brass);outline-offset:2px;bor
 .plrow:last-child{border-bottom:0;padding-bottom:0}
 .plmeta{color:var(--ink-2);font-size:13px}
 .plwin{font-size:13px;color:var(--ink-2);white-space:nowrap}
+/* Recent-log rows are buttons that open the edit popup. */
+.plrow-btn{width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--hair);border-radius:0;font:inherit;color:inherit;cursor:pointer;padding:8px 4px 9px;margin:0;box-shadow:none;transition:background .12s ease}
+.plrow-btn:last-child{border-bottom:0}
+.plrow-btn:hover{background:rgba(198,144,47,.09)}
+.plrow-btn .plmain{flex:1}
+.pledit{font-size:14px;color:var(--ink-2);opacity:.55;flex:none}
+.plrow-btn:hover .pledit{opacity:1;color:var(--brass)}
+.show-all{margin-top:14px;width:100%;padding:9px}
+.del-confirm{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;justify-content:flex-end}
+.btn.danger{background:var(--crit);color:#fff;border-color:var(--crit)}
+.btn.danger:hover{background:#9a4230}
+.btn.ghost.danger-text{color:var(--crit)}
+.btn.ghost.danger-text:hover{border-color:var(--crit)}
 
 /* ---- Shelf filter bar ---- */
 .filterbar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-top:16px;padding:14px 16px;background:var(--paper);border:1px solid var(--hair);border-radius:14px}

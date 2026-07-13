@@ -205,6 +205,60 @@ export async function logPlay(play) {
   }
 }
 
+// Recompute a game's play stats after one of its plays is edited or removed.
+//   countDelta   — change to the plays counter (−1 on delete; ±1 when a play's game
+//                  changes; 0 when only the date/details changed). We delta rather than
+//                  overwrite so any seeded count that predates the record log is preserved.
+//   remaining    — the play records that STILL belong to `gameId` after the change; used
+//                  to recompute lastPlayed (null if none remain, so playedDaysAgo falls
+//                  back to the legacy `last` field).
+// Kept in this layer (not pushed through updateGame) because `increment()` is a Firestore
+// sentinel that has no meaning in the localStorage backend — same reason logPlay branches.
+async function reconcileGame(gameId, countDelta, remaining) {
+  if (!gameId) return
+  const lastPlayed = remaining.length
+    ? Math.max(...remaining.map((p) => toMillis(p.playedAt) || 0)) : null
+  if (hasFirebase) {
+    const patch = { lastPlayed }
+    if (countDelta) patch.plays = increment(countDelta)
+    await updateDoc(doc(db, 'games', gameId), patch)
+    return
+  }
+  const games = lsRead()
+  const i = games.findIndex((g) => g.id === gameId)
+  if (i >= 0) {
+    games[i] = { ...games[i], lastPlayed, plays: Math.max(0, (games[i].plays || 0) + countDelta) }
+    lsWrite(games)
+  }
+}
+
+// Edit an existing play. `prev` is the current record, `patch` the changed fields,
+// `allPlays` the full current log (so we can recompute the affected game(s) without
+// waiting for the subscription to round-trip). Handles the game-changed case by moving
+// the +1 from the old game to the new one.
+export async function updatePlay(prev, patch, allPlays) {
+  const id = prev.id
+  const next = { ...prev, ...patch }
+  if (hasFirebase) await updateDoc(doc(db, 'plays', id), patch)
+  else lsWritePlays(lsReadPlays().map((p) => (p.id === id ? { ...p, ...patch } : p)))
+
+  const others = allPlays.filter((p) => p.id !== id)
+  if (prev.gameId !== next.gameId) {
+    await reconcileGame(prev.gameId, -1, others.filter((p) => p.gameId === prev.gameId))
+    await reconcileGame(next.gameId, +1, others.filter((p) => p.gameId === next.gameId).concat(next))
+  } else {
+    await reconcileGame(next.gameId, 0, others.filter((p) => p.gameId === next.gameId).concat(next))
+  }
+}
+
+// Remove a play and roll back its effect on the game's stats.
+export async function deletePlay(play, allPlays) {
+  const id = play.id
+  if (hasFirebase) await deleteDoc(doc(db, 'plays', id))
+  else lsWritePlays(lsReadPlays().filter((p) => p.id !== id))
+  await reconcileGame(play.gameId, -1, allPlays.filter((p) => p.gameId === play.gameId && p.id !== id))
+}
+
 // ---- Game Night sessions (real-time voting rooms) ----
 // Firestore: sessions/{code} doc + sessions/{code}/votes/{voterId} subcollection.
 // localStorage: one blob keyed by code, votes nested inside — so the flow still
